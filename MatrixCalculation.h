@@ -60,6 +60,10 @@ MyVec2 Transform(const MyVec2& vector, const Matrix3x3& matrix);
 
 MyVec3 Transform(const MyVec3& vector, const Matrix4x4& matrix);
 
+Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2);
+
+Matrix4x4 Sub(const Matrix4x4& m1, const Matrix4x4& m2);
+
 Matrix4x4 Multiply(Matrix4x4& matrix1, Matrix4x4& matrix2);
 
 Matrix4x4 Transpose(const Matrix4x4& m);
