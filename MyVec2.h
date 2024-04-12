@@ -100,4 +100,5 @@ public:
 	float Angle() const {
 		return std::atan2f(y, x);
 	}
+
 };
