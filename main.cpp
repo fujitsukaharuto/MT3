@@ -64,7 +64,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Novice::ScreenPrintf(0, kCol * 4, "%.02f : Length", resultLeng);
 		VectorPrint(0, kCol * 5, resultNorm, " : Normalize");
 
-
 		///
 		/// ↑描画処理ここまで
 		///
