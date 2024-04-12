@@ -52,10 +52,6 @@ public:
 		return MyVec2(x + v.x, y + v.y);
 	}
 
-	MyVec2& operator + (MyVec2&& v)const {
-		return v += *this;
-	}
-
 	MyVec2& operator -= (const MyVec2& v) {
 		x -= v.x;
 		y -= v.y;
@@ -64,13 +60,6 @@ public:
 
 	MyVec2 operator - (const MyVec2& v) const {
 		return MyVec2(x - v.x, y - v.y);
-	}
-
-	MyVec2& operator - (MyVec2&& v)const {
-		v.x = -v.x;
-		v.y = -v.y;
-		v += *this;
-		return v;
 	}
 
 	MyVec2& operator *= (float k) {
