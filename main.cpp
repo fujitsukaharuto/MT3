@@ -6,6 +6,7 @@ const char kWindowTitle[] = "LE2A_15_フジツカ_ハルト_MT3";
 
 static const int kRow = 20;
 static const int kCol = 60;
+void VectorPrint(int x, int y, const MyVec3& vec, const char* lab);
 void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat);
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -14,7 +15,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, 1280, 720);
 
-
+	MyVec3 translate{ 4.1f, 2.6f, 0.8f };
+	MyVec3 scale{ 1.5f,5.2f,7.3f };
+	Matrix4x4 translateMat = MakeTranslateMatrix(translate);
+	Matrix4x4 scaleMat = MakeScaleMatrix(scale);
+	MyVec3 point{ 2.3f,3.8f,1.4f };
+	Matrix4x4 transformMat =
+	{ 1.0f,2.0f,3.0f,4.0f,
+	3.0f,1.0f,1.0f,2.0f,
+	1.0f,4.0f,2.0f,3.0f,
+	2.0f,2.0f,1.0f,3.0f };
+	MyVec3 transformed = Transform(point, transformMat);
 
 
 	// キー入力結果を受け取る箱
@@ -44,7 +55,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-
+		VectorPrint(0, 0, transformed, "transformMatrix");
+		MatrixScreenPrintf(0, kRow, translateMat);
+		MatrixScreenPrintf(0, kRow  *6, scaleMat);
 
 		///
 		/// ↑描画処理ここまで
@@ -62,6 +75,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ライブラリの終了
 	Novice::Finalize();
 	return 0;
+}
+
+void VectorPrint(int x, int y, const MyVec3& vec, const char* lab)
+{
+	Novice::ScreenPrintf(x, y, "%.02f", vec.x);
+	Novice::ScreenPrintf(x + kCol, y, "%.02f", vec.y);
+	Novice::ScreenPrintf(x + kCol * 2, y, "%.02f", vec.z);
+	Novice::ScreenPrintf(x + kCol * 3, y, "%s", lab);
 }
 
 void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat)
