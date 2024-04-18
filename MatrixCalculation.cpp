@@ -417,4 +417,3 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovy, float aspectRation, float nearCli
 
 	return result;
 }
-

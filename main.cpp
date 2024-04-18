@@ -15,17 +15,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, 1280, 720);
 
-	MyVec3 translate{ 4.1f, 2.6f, 0.8f };
-	MyVec3 scale{ 1.5f,5.2f,7.3f };
-	Matrix4x4 translateMat = MakeTranslateMatrix(translate);
-	Matrix4x4 scaleMat = MakeScaleMatrix(scale);
-	MyVec3 point{ 2.3f,3.8f,1.4f };
-	Matrix4x4 transformMat =
-	{ 1.0f,2.0f,3.0f,4.0f,
-	3.0f,1.0f,1.0f,2.0f,
-	1.0f,4.0f,2.0f,3.0f,
-	2.0f,2.0f,1.0f,3.0f };
-	MyVec3 transformed = Transform(point, transformMat);
+	MyVec3 rotate{ 0.4f,1.43f,-0.8f };
+	Matrix4x4 rotateXMat = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMat = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMat = MakeRotateZMatrix(rotate.z);
+	Matrix4x4 rotateXYZMat = Multiply(rotateYMat, rotateZMat);
+	rotateXYZMat = Multiply(rotateXMat, rotateXYZMat);
 
 
 	// キー入力結果を受け取る箱
@@ -55,9 +50,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		VectorPrint(0, 0, transformed, "transformMatrix");
-		MatrixScreenPrintf(0, kRow, translateMat);
-		MatrixScreenPrintf(0, kRow  *6, scaleMat);
+		MatrixScreenPrintf(0, 0, rotateXMat);
+		MatrixScreenPrintf(0, kRow * 5, rotateYMat);
+		MatrixScreenPrintf(0, kRow * 5 * 2, rotateZMat);
+		MatrixScreenPrintf(0, kRow * 5 * 3, rotateXYZMat);
 
 		///
 		/// ↑描画処理ここまで
