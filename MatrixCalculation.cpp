@@ -386,6 +386,7 @@ Matrix4x4 MakeRotateXYZMatrix(const MyVec3& rota)
 
 Matrix4x4 MakeAffineMatrix(const MyVec3& scale, const MyVec3& rotate, const MyVec3& translate)
 {
+	//affine
 	Matrix4x4 result = MakeIdentity4x4();
 	Matrix4x4 S = MakeScaleMatrix(scale);
 	Matrix4x4 R = MakeRotateXYZMatrix(rotate);
