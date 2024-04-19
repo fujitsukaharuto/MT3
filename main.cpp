@@ -24,8 +24,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 translate{};
 
 	MyVec3 cameraPosition{ 0.0f,0.0f,-30.0f };
+	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 	MyVec3 kLocalVer[3]{
-		{0.0f,1.0f,0.0f},{-1.0f,-1.0f,0.0f},{1.0f,-1.0f,0.0f}
+		{0.0f,1.0f,0.0f},{1.0f,-1.0f,0.0f},{-1.0f,-1.0f,0.0f}
 	};
 
 	// キー入力結果を受け取る箱
@@ -63,6 +64,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			translate.x += kSpeed;
 		}
+		if (keys[DIK_UP])
+		{
+			translate.y += kSpeed;
+		}
 
 		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
 		Matrix4x4 cameraMat=MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
@@ -78,7 +83,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			MyVec3 ndcVer = Transform(kLocalVer[i], worldViewProjectionMat);
 			screenVertices[i] = Transform(ndcVer, viewportMat);
 		}
-
+		MyVec3 crossv1 = screenVertices[1] - screenVertices[0];
+		MyVec3 crossv2 = screenVertices[2] - screenVertices[1];
+		MyVec3 crossdir = Cross(crossv1, crossv2);
+		float dot = cameraDir * crossdir;
 
 		///
 		/// ↑更新処理ここまで
@@ -89,8 +97,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		VectorPrint(0, 0, cross, "Cross");
-		Novice::DrawTriangle(int(screenVertices[0].x), int(screenVertices[0].y), int(screenVertices[1].x), int(screenVertices[1].y), int(screenVertices[2].x), int(screenVertices[2].y), RED, kFillModeSolid);
-
+		VectorPrint(0, kRow, rotate, "Rotate");
+		VectorPrint(0, kRow*2, translate, "Trans");
+		if (dot<0)
+		{
+			Novice::DrawTriangle(int(screenVertices[0].x), int(screenVertices[0].y), int(screenVertices[1].x), int(screenVertices[1].y), int(screenVertices[2].x), int(screenVertices[2].y), RED, kFillModeSolid);
+		}
+		
 		///
 		/// ↑描画処理ここまで
 		///

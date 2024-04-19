@@ -24,6 +24,7 @@ public:
 		return *this;
 	}
 
+	MyVec3 operator-(const MyVec3& v) const { return MyVec3(x - v.x, y - v.y, z - v.z); }
 	float operator*(const MyVec3& v) const { return (x * v.x) + (y * v.y) + (z * v.z); }
 
 };
