@@ -29,6 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{0.0f,1.0f,0.0f},{1.0f,-1.0f,0.0f},{-1.0f,-1.0f,0.0f}
 	};
 
+	MyVec3 ndcVer[3];
+
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
 	char preKeys[256] = {0};
@@ -80,11 +82,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 screenVertices[3];
 		for (uint32_t i = 0; i < 3; i++)
 		{
-			MyVec3 ndcVer = Transform(kLocalVer[i], worldViewProjectionMat);
-			screenVertices[i] = Transform(ndcVer, viewportMat);
+			ndcVer[i] = Transform(kLocalVer[i], worldViewProjectionMat);
+			screenVertices[i] = Transform(ndcVer[i], viewportMat);
 		}
-		MyVec3 crossv1 = screenVertices[1] - screenVertices[0];
-		MyVec3 crossv2 = screenVertices[2] - screenVertices[1];
+		MyVec3 crossv1 = ndcVer[1] - ndcVer[0];
+		MyVec3 crossv2 = ndcVer[2] - ndcVer[1];
 		MyVec3 crossdir = Cross(crossv1, crossv2);
 		float dot = cameraDir * crossdir;
 
