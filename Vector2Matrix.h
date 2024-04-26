@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "MyVec2.h"
+#include "MyVec3.h"
 
 /// <summary>
 /// 2x2Matrixベクトル
@@ -31,4 +32,10 @@ struct Quad final
 	MyVec2 rt;
 	MyVec2 lb;
 	MyVec2 rb;
+};
+
+struct Sphere
+{
+	MyVec3 ceneter;
+	float radius;
 };
