@@ -13,6 +13,7 @@ void VectorPrint(int x, int y, const MyVec3& vec, const char* lab);
 void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat);
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProject, const Matrix4x4& viewPort, uint32_t color);
 void DrawGrid(const Matrix4x4& viewProject, const Matrix4x4& viewport);
+bool IsCollision(const Sphere& s1, const Sphere& s2);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -27,14 +28,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 
+	Sphere s1 = { {0.0f,1.0f,0.0f},0.02f };
+	Sphere s2 = { {1.0f,0.0f,0.0f},0.02f };
 
-	Segument segument{ {-2.0f,-1.0f,0.0f},{3.0f,2.0f,2.0f} };
-	MyVec3 point{ -1.5f,0.6f,0.6f };
-
-	MyVec3 project = Project((point - segument.origin), segument.diff);
-	MyVec3 clossPoint = ClosestPoint(point, segument);
-
-
+	uint32_t color = 0xffffffff;
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -56,9 +53,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 
 		ImGui::Begin("Sphere,Camera");
-		ImGui::SliderFloat3("Camera Trans", &cameraPosition.x, -2.0f, 2.0f);
-		ImGui::SliderFloat3("point", &point.x, -2.0f, 2.0f);
-		ImGui::InputFloat3("Project", &project.x, "%.3f", ImGuiInputTextFlags_ReadOnly);
+		ImGui::SliderFloat3("Camera Trans", &cameraPosition.x, -8.0f, 0.0f);
+		ImGui::SliderFloat3("Sphere1", &s1.ceneter.x, -2.0f, 2.0f);
+		ImGui::SliderFloat("Sphere1Radius", &s1.radius, -2.0f, 2.0f);
+		ImGui::SliderFloat3("Sphere2", &s2.ceneter.x, -2.0f, 2.0f);
+		ImGui::SliderFloat("Sphere2Radius", &s2.radius, -2.0f, 2.0f);
 		ImGui::End();
 
 #endif // _DEBUG
@@ -70,16 +69,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 viewMat = Inverse(cameraMat);
 		Matrix4x4 projectionMat = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.f);
 		Matrix4x4 viewProject= Multiply(viewMat, projectionMat);
-		Matrix4x4 worldViewProjectionMat = Multiply(viewMat, projectionMat);
-		worldViewProjectionMat = Multiply(worldMat, worldViewProjectionMat);
+		//Matrix4x4 worldViewProjectionMat = Multiply(viewMat, projectionMat);
+		//worldViewProjectionMat = Multiply(worldMat, worldViewProjectionMat);
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		Sphere pintSphere{ point,0.01f };
-		Sphere closestPointSphere{ clossPoint,0.01f };
-
-		MyVec3 st = Transform(Transform(segument.origin, viewProject), viewportMat);
-		MyVec3 ed = Transform(Transform(segument.origin + segument.diff, viewProject), viewportMat);
+		if (IsCollision(s1,s2))
+		{
+			color = RED;
+		}
+		else
+		{
+			color = WHITE;
+		}
+		
+		
 
 		///
 		/// ↑更新処理ここまで
@@ -91,11 +95,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		DrawGrid(viewProject, viewportMat);
 
-		Novice::DrawLine(int(st.x), int(st.y), int(ed.x), int(ed.y), WHITE);
-
-		DrawSphere(pintSphere, viewProject, viewportMat, RED);
-		DrawSphere(closestPointSphere, viewProject, viewportMat, BLACK);
-
+		
+		DrawSphere(s1, viewProject, viewportMat, color);
+		DrawSphere(s2, viewProject, viewportMat, WHITE);
 
 
 
@@ -244,4 +246,16 @@ void DrawGrid(const Matrix4x4& viewProject, const Matrix4x4& viewport)
 				int(screenVerb.x), int(screenVerb.y), WHITE);
 		}
 	}
+}
+
+bool IsCollision(const Sphere& s1, const Sphere& s2)
+{
+	MyVec3 dis = s2.ceneter - s1.ceneter;
+	float leng = dis.Lenght();
+	if (leng < (s1.radius + s2.radius))
+	{
+		return true;
+	}
+
+	return false;
 }
