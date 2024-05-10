@@ -28,8 +28,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 
-	Sphere s1 = { {0.0f,1.0f,0.0f},0.02f };
-	Sphere s2 = { {1.0f,0.0f,0.0f},0.02f };
+	Sphere s1 = { {0.0f,0.0f,0.0f},0.5f };
+	Sphere s2 = { {1.0f,0.0f,0.0f},0.5f };
 
 	uint32_t color = 0xffffffff;
 
@@ -53,7 +53,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 
 		ImGui::Begin("Sphere,Camera");
-		ImGui::SliderFloat3("Camera Trans", &cameraPosition.x, -8.0f, 0.0f);
+		ImGui::SliderFloat3("Camera Trans", &cameraPosition.x, -8.0f, 3.0f);
 		ImGui::SliderFloat3("Sphere1", &s1.ceneter.x, -2.0f, 2.0f);
 		ImGui::SliderFloat("Sphere1Radius", &s1.radius, -2.0f, 2.0f);
 		ImGui::SliderFloat3("Sphere2", &s2.ceneter.x, -2.0f, 2.0f);
