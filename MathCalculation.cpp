@@ -68,3 +68,22 @@ MyVec3 Cross(const MyVec3& v1, const MyVec3& v2)
 
 	return result;
 }
+
+MyVec3 Project(const MyVec3& v1, const MyVec3& v2)
+{
+	MyVec3 normVec = v2.Normalize();
+
+	float dot = v1 * normVec;
+
+	return normVec * dot;
+}
+
+MyVec3 ClosestPoint(const MyVec3& point, const Segument& segument)
+{
+	MyVec3 t = point - segument.origin;
+	t = Project(t, segument.diff);
+
+	MyVec3 result = segument.origin + t;
+
+	return result;
+}

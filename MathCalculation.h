@@ -6,6 +6,25 @@
 #include "MyVec2.h"
 #include "MyVec3.h"
 
+struct Line
+{
+	MyVec3 origin;
+	MyVec3 diff;
+};
+
+struct Ray
+{
+	MyVec3 origin;
+	MyVec3 diff;
+};
+
+struct Segument
+{
+	MyVec3 origin;
+	MyVec3 diff;
+};
+
+
 /// <summary>
 /// 2次元ベクトルの2点の距離
 /// </summary>
@@ -37,3 +56,7 @@ MyVec2 Lerp(MyVec2 start, MyVec2 end, float t);
 //Quad QuadPos(const MyVec2& pos, const float& radius);
 
 MyVec3 Cross(const MyVec3& v1, const MyVec3& v2);
+
+MyVec3 Project(const MyVec3& v1, const MyVec3& v2);
+
+MyVec3 ClosestPoint(const MyVec3& point, const Segument& segument);
