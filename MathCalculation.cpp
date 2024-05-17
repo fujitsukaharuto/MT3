@@ -87,3 +87,12 @@ MyVec3 ClosestPoint(const MyVec3& point, const Segument& segument)
 
 	return result;
 }
+
+MyVec3 Perpendicular(const MyVec3& vector)
+{
+	if (vector.x!=0.0f||vector.y!=0.0f)
+	{
+		return { -vector.y,vector.x,0.0f };
+	}
+	return { 0.0f,-vector.z,vector.y };
+}

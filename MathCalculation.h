@@ -24,6 +24,11 @@ struct Segument
 	MyVec3 diff;
 };
 
+struct Plane
+{
+	MyVec3 normal;
+	float distance;
+};
 
 /// <summary>
 /// 2次元ベクトルの2点の距離
@@ -60,3 +65,5 @@ MyVec3 Cross(const MyVec3& v1, const MyVec3& v2);
 MyVec3 Project(const MyVec3& v1, const MyVec3& v2);
 
 MyVec3 ClosestPoint(const MyVec3& point, const Segument& segument);
+
+MyVec3 Perpendicular(const MyVec3& vector);

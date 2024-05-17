@@ -14,6 +14,8 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat);
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProject, const Matrix4x4& viewPort, uint32_t color);
 void DrawGrid(const Matrix4x4& viewProject, const Matrix4x4& viewport);
 bool IsCollision(const Sphere& s1, const Sphere& s2);
+bool IsCollision(const Sphere& sphere, const Plane& plane);
+void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -24,12 +26,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 rotate{ 0.0f,0.0f,0.0f };
 	MyVec3 translate{ 0.0f,0.0f,0.0f };
 
-	MyVec3 cameraPosition{ 0.0f,1.9f,-6.49f };
+	MyVec3 cameraPosition{ 0.0f,1.9f,-10.49f };
+	MyVec3 camerarota{ 0.26f,0.0f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 
 	Sphere s1 = { {0.0f,0.0f,0.0f},0.5f };
-	Sphere s2 = { {1.0f,0.0f,0.0f},0.5f };
+	Plane plane{};
+	plane.normal = { 1.0f,1.0f,0.0f };
+	plane.distance = 1.0f;
 
 	uint32_t color = 0xffffffff;
 
@@ -53,19 +58,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 
 		ImGui::Begin("Sphere,Camera");
-		ImGui::SliderFloat3("Camera Trans", &cameraPosition.x, -8.0f, 3.0f);
+		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
+
 		ImGui::SliderFloat3("Sphere1", &s1.ceneter.x, -2.0f, 2.0f);
 		ImGui::SliderFloat("Sphere1Radius", &s1.radius, -2.0f, 2.0f);
-		ImGui::SliderFloat3("Sphere2", &s2.ceneter.x, -2.0f, 2.0f);
-		ImGui::SliderFloat("Sphere2Radius", &s2.radius, -2.0f, 2.0f);
+
+		ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
+		plane.normal = plane.normal.Normalize();
+		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);
 		ImGui::End();
 
 #endif // _DEBUG
 
-
+		if (keys[DIK_LEFT])
+		{
+			camerarota.y += 0.01f;
+		}
+		if (keys[DIK_RIGHT])
+		{
+			camerarota.y -= 0.01f;
+		}
+		if (keys[DIK_DOWN])
+		{
+			camerarota.x -= 0.01f;
+		}
+		if (keys[DIK_UP])
+		{
+			camerarota.x += 0.01f;
+		}
 
 		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
-		Matrix4x4 cameraMat=MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.26f,0.0f,0.0f}, cameraPosition);
+		Matrix4x4 cameraMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
+		cameraMat = Multiply(cameraMat, MakeRotateYMatrix(camerarota.y));
+		cameraMat = Multiply(cameraMat, MakeRotateXMatrix(camerarota.x));
 		Matrix4x4 viewMat = Inverse(cameraMat);
 		Matrix4x4 projectionMat = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.f);
 		Matrix4x4 viewProject= Multiply(viewMat, projectionMat);
@@ -74,7 +99,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		if (IsCollision(s1,s2))
+		if (IsCollision(s1,plane))
 		{
 			color = RED;
 		}
@@ -97,7 +122,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		
 		DrawSphere(s1, viewProject, viewportMat, color);
-		DrawSphere(s2, viewProject, viewportMat, WHITE);
+		DrawPlane(plane, viewProject, viewportMat, WHITE);
 
 
 
@@ -258,4 +283,54 @@ bool IsCollision(const Sphere& s1, const Sphere& s2)
 	}
 
 	return false;
+}
+
+bool IsCollision(const Sphere& sphere, const Plane& plane)
+{
+	float dot = plane.normal * sphere.ceneter;
+	float k = dot - plane.distance;
+	k = std::sqrtf(k * k);
+
+	if (k<sphere.radius)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& viewport, uint32_t color)
+{
+	MyVec3 center = plane.normal * plane.distance;
+	MyVec3 perpendiculars[4];
+	perpendiculars[0] = Perpendicular(plane.normal);
+	perpendiculars[0] = perpendiculars[0].Normalize();
+
+	perpendiculars[1] = { -perpendiculars[0].x,-perpendiculars[0].y,-perpendiculars[0].z };
+
+	perpendiculars[2] = Cross(plane.normal, perpendiculars[0]);
+
+	perpendiculars[3]= { -perpendiculars[2].x,-perpendiculars[2].y,-perpendiculars[2].z };
+
+	MyVec3 points[4];
+	for (int32_t index = 0; index < 4; ++index)
+	{
+		MyVec3 extend = perpendiculars[index] * 2.0f;
+		MyVec3 point = center + extend;
+		points[index] = Transform(Transform(point, vieProMat), viewport);
+	}
+
+
+	Novice::DrawLine(int(points[1].x), int(points[1].y),
+		int(points[2].x), int(points[2].y), color);
+
+	Novice::DrawLine(int(points[1].x), int(points[1].y),
+		int(points[3].x), int(points[3].y), color);
+
+	Novice::DrawLine(int(points[0].x), int(points[0].y),
+		int(points[2].x), int(points[2].y), color);
+
+	Novice::DrawLine(int(points[3].x), int(points[3].y),
+		int(points[0].x), int(points[0].y), color);
+
 }
