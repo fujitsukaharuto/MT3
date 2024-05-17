@@ -27,7 +27,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 rotate{ 0.0f,0.0f,0.0f };
 	MyVec3 translate{ 0.0f,0.0f,0.0f };
 
-	MyVec3 cameraPosition{ 0.0f,1.9f,-10.49f };
+	MyVec3 cameraPosition{ 0.0f,0.0f,-10.49f };
 	MyVec3 camerarota{ 0.26f,0.0f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
