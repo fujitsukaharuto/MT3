@@ -15,6 +15,7 @@ void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProject, const Matrix
 void DrawGrid(const Matrix4x4& viewProject, const Matrix4x4& viewport);
 bool IsCollision(const Sphere& s1, const Sphere& s2);
 bool IsCollision(const Sphere& sphere, const Plane& plane);
+bool IsCollision(const Segument& segument, const Plane& plane);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -31,12 +32,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 
-	Sphere s1 = { {0.0f,0.0f,0.0f},0.5f };
+
 	Plane plane{};
 	plane.normal = { 1.0f,1.0f,0.0f };
 	plane.distance = 1.0f;
 
 	uint32_t color = 0xffffffff;
+
+	Segument segument{};
+	segument.origin = { 0.0f,0.0f,0.0f };
+	segument.diff = { 1.0f,0.5f,0.2f };
+	/*float lenght = 1.0f;*/
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -60,8 +66,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Sphere,Camera");
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 
-		ImGui::SliderFloat3("Sphere1", &s1.ceneter.x, -2.0f, 2.0f);
-		ImGui::SliderFloat("Sphere1Radius", &s1.radius, -2.0f, 2.0f);
+		ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
+		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
+		/*lenght = MyVec3(segument.diff - segument.origin).Lenght();
+		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);*/
+		
 
 		ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
 		plane.normal = plane.normal.Normalize();
@@ -99,7 +108,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		if (IsCollision(s1,plane))
+		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);
+
+		if (IsCollision(segument,plane))
 		{
 			color = RED;
 		}
@@ -121,7 +133,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewProject, viewportMat);
 
 		
-		DrawSphere(s1, viewProject, viewportMat, color);
+		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+			int(diffPoint.x), int(diffPoint.y), color);
 		DrawPlane(plane, viewProject, viewportMat, WHITE);
 
 
@@ -296,6 +309,22 @@ bool IsCollision(const Sphere& sphere, const Plane& plane)
 		return true;
 	}
 
+	return false;
+}
+
+bool IsCollision(const Segument& segument, const Plane& plane)
+{
+	float dot = segument.diff * plane.normal;
+	if (dot==0.0f)
+	{
+		return false;
+	}
+	float t = plane.distance - segument.origin * plane.normal;
+	t = t / dot;
+	if (0 <= t && t <= 1)
+	{
+		return true;
+	}
 	return false;
 }
 
