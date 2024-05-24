@@ -16,7 +16,9 @@ void DrawGrid(const Matrix4x4& viewProject, const Matrix4x4& viewport);
 bool IsCollision(const Sphere& s1, const Sphere& s2);
 bool IsCollision(const Sphere& sphere, const Plane& plane);
 bool IsCollision(const Segument& segument, const Plane& plane);
+bool IsCollision(const Triangle& triangle, const Segument& segument);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
+void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -28,7 +30,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 translate{ 0.0f,0.0f,0.0f };
 
 	MyVec3 cameraPosition{ 0.0f,0.0f,-10.49f };
-	MyVec3 camerarota{ 0.26f,0.0f,0.0f };
+	MyVec3 camerarota{ 0.58f,-4.61f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 
@@ -40,9 +42,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	uint32_t color = 0xffffffff;
 
 	Segument segument{};
-	segument.origin = { 0.0f,0.0f,0.0f };
+	segument.origin = { -0.56f,0.0f,0.0f };
 	segument.diff = { 1.0f,0.5f,0.2f };
 	/*float lenght = 1.0f;*/
+
+	Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -65,16 +69,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::Begin("Sphere,Camera");
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
+		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
 		ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
 		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
 		/*lenght = MyVec3(segument.diff - segument.origin).Lenght();
 		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);*/
 		
+		ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
+		ImGui::DragFloat3("Triangle v2", &triangle.vertices[1].x,0.01f);
+		ImGui::DragFloat3("Triangle v3", &triangle.vertices[2].x,0.01f);
 
-		ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
+		/*ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
 		plane.normal = plane.normal.Normalize();
-		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);
+		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);*/
 		ImGui::End();
 
 #endif // _DEBUG
@@ -98,8 +106,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
 		Matrix4x4 cameraMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
-		cameraMat = Multiply(cameraMat, MakeRotateYMatrix(camerarota.y));
 		cameraMat = Multiply(cameraMat, MakeRotateXMatrix(camerarota.x));
+		cameraMat = Multiply(cameraMat, MakeRotateYMatrix(camerarota.y));
 		Matrix4x4 viewMat = Inverse(cameraMat);
 		Matrix4x4 projectionMat = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.f);
 		Matrix4x4 viewProject= Multiply(viewMat, projectionMat);
@@ -111,7 +119,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);
 
-		if (IsCollision(segument,plane))
+		if (IsCollision(triangle, segument))
 		{
 			color = RED;
 		}
@@ -135,7 +143,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 			int(diffPoint.x), int(diffPoint.y), color);
-		DrawPlane(plane, viewProject, viewportMat, WHITE);
+		DrawTriangle(triangle, viewProject, viewportMat, WHITE);
 
 
 
@@ -328,6 +336,35 @@ bool IsCollision(const Segument& segument, const Plane& plane)
 	return false;
 }
 
+bool IsCollision(const Triangle& triangle, const Segument& segument)
+{
+	Plane plate;
+	plate.normal = Cross((triangle.vertices[1] - triangle.vertices[0]), (triangle.vertices[2] - triangle.vertices[1]));
+	plate.normal = plate.normal.Normalize();
+	plate.distance = triangle.vertices[0] * plate.normal;
+	float dot = segument.diff * plate.normal;
+	if (dot == 0.0f)
+	{
+		return false;
+	}
+	float t = plate.distance - segument.origin * plate.normal;
+	t = t / dot;
+	if (0 <= t && t <= 1)
+	{
+		MyVec3 p = segument.origin + (segument.diff * t);
+		MyVec3 cross01 = Cross((triangle.vertices[1] - triangle.vertices[0]), (p - triangle.vertices[1]));
+		MyVec3 cross12 = Cross((triangle.vertices[2] - triangle.vertices[1]), (p - triangle.vertices[2]));
+		MyVec3 cross20 = Cross((triangle.vertices[0] - triangle.vertices[2]), (p - triangle.vertices[0]));
+		if ((cross01 * plate.normal) >= 0.0f &&
+			(cross12 * plate.normal) >= 0.0f &&
+			(cross20 * plate.normal) >= 0.0f)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& viewport, uint32_t color)
 {
 	MyVec3 center = plane.normal * plane.distance;
@@ -362,4 +399,16 @@ void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& 
 	Novice::DrawLine(int(points[3].x), int(points[3].y),
 		int(points[0].x), int(points[0].y), color);
 
+}
+
+void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color)
+{
+	MyVec3 points[3];
+	points[0] = Transform(Transform(triangle.vertices[0], viewProjection), viewport);
+	points[1] = Transform(Transform(triangle.vertices[1], viewProjection), viewport);
+	points[2] = Transform(Transform(triangle.vertices[2], viewProjection), viewport);
+
+	Novice::DrawTriangle(int(points[0].x), int(points[0].y),
+		int(points[1].x), int(points[1].y),
+		int(points[2].x), int(points[2].y), color, kFillModeWireFrame);
 }

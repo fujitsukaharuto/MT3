@@ -30,6 +30,11 @@ struct Plane
 	float distance;
 };
 
+struct Triangle
+{
+	MyVec3 vertices[3];
+};
+
 /// <summary>
 /// 2次元ベクトルの2点の距離
 /// </summary>
