@@ -35,6 +35,12 @@ struct Triangle
 	MyVec3 vertices[3];
 };
 
+struct AABB
+{
+	MyVec3 min;
+	MyVec3 max;
+};
+
 /// <summary>
 /// 2次元ベクトルの2点の距離
 /// </summary>

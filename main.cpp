@@ -17,8 +17,10 @@ bool IsCollision(const Sphere& s1, const Sphere& s2);
 bool IsCollision(const Sphere& sphere, const Plane& plane);
 bool IsCollision(const Segument& segument, const Plane& plane);
 bool IsCollision(const Triangle& triangle, const Segument& segument);
+bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -35,18 +37,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	Plane plane{};
+	/*Plane plane{};
 	plane.normal = { 1.0f,1.0f,0.0f };
-	plane.distance = 1.0f;
+	plane.distance = 1.0f;*/
 
 	uint32_t color = 0xffffffff;
 
-	Segument segument{};
-	segument.origin = { -0.56f,0.0f,0.0f };
-	segument.diff = { 1.0f,0.5f,0.2f };
+	//Segument segument{};
+	//segument.origin = { -0.56f,0.0f,0.0f };
+	//segument.diff = { 1.0f,0.5f,0.2f };
 	/*float lenght = 1.0f;*/
 
-	Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };
+	/*Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };*/
+
+	AABB aabb1{
+		.min{-0.5f,-0.5f,-0.5f},
+		.max{0.0f,0.0f,0.0f},
+	};
+
+	AABB aabb2{
+		.min{-0.2f,-0.2f,-0.2f},
+		.max{1.0f,1.0f,1.0f},
+	};
+
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -71,18 +84,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
-		ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
-		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
+		/*ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
+		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);*/
 		/*lenght = MyVec3(segument.diff - segument.origin).Lenght();
 		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);*/
 		
-		ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
+		/*ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
 		ImGui::DragFloat3("Triangle v2", &triangle.vertices[1].x,0.01f);
-		ImGui::DragFloat3("Triangle v3", &triangle.vertices[2].x,0.01f);
+		ImGui::DragFloat3("Triangle v3", &triangle.vertices[2].x,0.01f);*/
 
 		/*ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
 		plane.normal = plane.normal.Normalize();
 		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);*/
+
+		ImGui::DragFloat3("a_min", &aabb1.min.x, 0.1f, -3.0f, 3.0f);
+		ImGui::DragFloat3("a_max", &aabb1.max.x, 0.1f, -3.0f, 3.0f);
+		aabb1.min.x = (std::min)(aabb1.min.x, aabb1.max.x);
+		aabb1.max.x = (std::max)(aabb1.min.x, aabb1.max.x);
+		aabb1.min.y = (std::min)(aabb1.min.y, aabb1.max.y);
+		aabb1.max.y = (std::max)(aabb1.min.y, aabb1.max.y);
+		aabb1.min.z = (std::min)(aabb1.min.z, aabb1.max.z);
+		aabb1.max.z = (std::max)(aabb1.min.z, aabb1.max.z);
+		ImGui::DragFloat3("b_min", &aabb2.min.x, 0.1f, -3.0f, 3.0f);
+		ImGui::DragFloat3("b_max", &aabb2.max.x, 0.1f, -3.0f, 3.0f);
+		aabb2.min.x = (std::min)(aabb2.min.x, aabb2.max.x);
+		aabb2.max.x = (std::max)(aabb2.min.x, aabb2.max.x);
+		aabb2.min.y = (std::min)(aabb2.min.y, aabb2.max.y);
+		aabb2.max.y = (std::max)(aabb2.min.y, aabb2.max.y);
+		aabb2.min.z = (std::min)(aabb2.min.z, aabb2.max.z);
+		aabb2.max.z = (std::max)(aabb2.min.z, aabb2.max.z);
+
 		ImGui::End();
 
 #endif // _DEBUG
@@ -116,10 +147,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);
+		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		if (IsCollision(triangle, segument))
+		if (IsCollision(aabb1, aabb2))
 		{
 			color = RED;
 		}
@@ -140,12 +171,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		DrawGrid(viewProject, viewportMat);
 
+		DrawAABB(aabb1, viewProject, viewportMat, color);
+		DrawAABB(aabb2, viewProject, viewportMat, WHITE);
+
 		
-		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
-			int(diffPoint.x), int(diffPoint.y), color);
-		DrawTriangle(triangle, viewProject, viewportMat, WHITE);
-
-
+		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+		//	int(diffPoint.x), int(diffPoint.y), color);
+		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
 
 		///
 		/// ↑描画処理ここまで
@@ -365,6 +397,17 @@ bool IsCollision(const Triangle& triangle, const Segument& segument)
 	return false;
 }
 
+bool IsCollision(const AABB& aabb1, const AABB& aabb2)
+{
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z))
+	{
+		return true;
+	}
+	return false;
+}
+
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& viewport, uint32_t color)
 {
 	MyVec3 center = plane.normal * plane.distance;
@@ -411,4 +454,45 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Mat
 	Novice::DrawTriangle(int(points[0].x), int(points[0].y),
 		int(points[1].x), int(points[1].y),
 		int(points[2].x), int(points[2].y), color, kFillModeWireFrame);
+}
+
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color)
+{
+	MyVec3 points[8];
+	points[0]= Transform(Transform(aabb.min, viewProjection), viewPort);
+	points[1] = Transform(Transform(MyVec3(aabb.max.x,aabb.min.y,aabb.min.z), viewProjection), viewPort);
+	points[2] = Transform(Transform(MyVec3(aabb.max.x, aabb.min.y, aabb.max.z), viewProjection), viewPort);
+	points[3] = Transform(Transform(MyVec3(aabb.min.x, aabb.min.y, aabb.max.z), viewProjection), viewPort);
+
+	points[4] = Transform(Transform(aabb.max, viewProjection), viewPort);
+	points[5] = Transform(Transform(MyVec3(aabb.min.x,aabb.max.y,aabb.max.z), viewProjection), viewPort);
+	points[6] = Transform(Transform(MyVec3(aabb.min.x,aabb.max.y,aabb.min.z), viewProjection), viewPort);
+	points[7] = Transform(Transform(MyVec3(aabb.max.x,aabb.max.y,aabb.min.z), viewProjection), viewPort);
+
+	Novice::DrawLine(int(points[0].x), int(points[0].y),
+		int(points[1].x), int(points[1].y), color);
+	Novice::DrawLine(int(points[1].x), int(points[1].y),
+		int(points[2].x), int(points[2].y), color);
+	Novice::DrawLine(int(points[2].x), int(points[2].y),
+		int(points[3].x), int(points[3].y), color);
+	Novice::DrawLine(int(points[3].x), int(points[3].y),
+		int(points[0].x), int(points[0].y), color);
+
+	Novice::DrawLine(int(points[4].x), int(points[4].y),
+		int(points[5].x), int(points[5].y), color);
+	Novice::DrawLine(int(points[5].x), int(points[5].y),
+		int(points[6].x), int(points[6].y), color);
+	Novice::DrawLine(int(points[6].x), int(points[6].y),
+		int(points[7].x), int(points[7].y), color);
+	Novice::DrawLine(int(points[7].x), int(points[7].y),
+		int(points[4].x), int(points[4].y), color);
+
+	Novice::DrawLine(int(points[0].x), int(points[0].y),
+		int(points[6].x), int(points[6].y), color);
+	Novice::DrawLine(int(points[1].x), int(points[1].y),
+		int(points[7].x), int(points[7].y), color);
+	Novice::DrawLine(int(points[2].x), int(points[2].y),
+		int(points[4].x), int(points[4].y), color);
+	Novice::DrawLine(int(points[3].x), int(points[3].y),
+		int(points[5].x), int(points[5].y), color);
 }
