@@ -4,6 +4,7 @@
 #include "MathCalculation.h"
 #include "imgui.h"
 #include <cmath>
+#include <algorithm>
 
 const char kWindowTitle[] = "LE2A_15_フジツカ_ハルト_MT3";
 
@@ -18,6 +19,7 @@ bool IsCollision(const Sphere& sphere, const Plane& plane);
 bool IsCollision(const Segument& segument, const Plane& plane);
 bool IsCollision(const Triangle& triangle, const Segument& segument);
 bool IsCollision(const AABB& aabb1, const AABB& aabb2);
+bool IsCollision(const AABB& aabb, const Sphere& sphere);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
@@ -50,15 +52,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	/*Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };*/
 
+	Sphere sphere{ {0.5f,0.5f,0.5f},0.4f };
+
 	AABB aabb1{
 		.min{-0.5f,-0.5f,-0.5f},
 		.max{0.0f,0.0f,0.0f},
 	};
 
-	AABB aabb2{
+	/*AABB aabb2{
 		.min{-0.2f,-0.2f,-0.2f},
 		.max{1.0f,1.0f,1.0f},
-	};
+	};*/
 
 
 	// キー入力結果を受け取る箱
@@ -97,22 +101,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		plane.normal = plane.normal.Normalize();
 		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);*/
 
-		ImGui::DragFloat3("a_min", &aabb1.min.x, 0.1f, -3.0f, 3.0f);
-		ImGui::DragFloat3("a_max", &aabb1.max.x, 0.1f, -3.0f, 3.0f);
+		ImGui::DragFloat3("sphere center", &sphere.ceneter.x, 0.01f, -3.0f, 3.0f);
+		ImGui::DragFloat("sphere radius", &sphere.radius, 0.01f, 0.0f, 3.0f);
+
+		ImGui::DragFloat3("a_min", &aabb1.min.x, 0.01f, -3.0f, 3.0f);
+		ImGui::DragFloat3("a_max", &aabb1.max.x, 0.01f, -3.0f, 3.0f);
 		aabb1.min.x = (std::min)(aabb1.min.x, aabb1.max.x);
 		aabb1.max.x = (std::max)(aabb1.min.x, aabb1.max.x);
 		aabb1.min.y = (std::min)(aabb1.min.y, aabb1.max.y);
 		aabb1.max.y = (std::max)(aabb1.min.y, aabb1.max.y);
 		aabb1.min.z = (std::min)(aabb1.min.z, aabb1.max.z);
 		aabb1.max.z = (std::max)(aabb1.min.z, aabb1.max.z);
-		ImGui::DragFloat3("b_min", &aabb2.min.x, 0.1f, -3.0f, 3.0f);
-		ImGui::DragFloat3("b_max", &aabb2.max.x, 0.1f, -3.0f, 3.0f);
-		aabb2.min.x = (std::min)(aabb2.min.x, aabb2.max.x);
-		aabb2.max.x = (std::max)(aabb2.min.x, aabb2.max.x);
-		aabb2.min.y = (std::min)(aabb2.min.y, aabb2.max.y);
-		aabb2.max.y = (std::max)(aabb2.min.y, aabb2.max.y);
-		aabb2.min.z = (std::min)(aabb2.min.z, aabb2.max.z);
-		aabb2.max.z = (std::max)(aabb2.min.z, aabb2.max.z);
+		//ImGui::DragFloat3("b_min", &aabb2.min.x, 0.1f, -3.0f, 3.0f);
+		//ImGui::DragFloat3("b_max", &aabb2.max.x, 0.1f, -3.0f, 3.0f);
+		//aabb2.min.x = (std::min)(aabb2.min.x, aabb2.max.x);
+		//aabb2.max.x = (std::max)(aabb2.min.x, aabb2.max.x);
+		//aabb2.min.y = (std::min)(aabb2.min.y, aabb2.max.y);
+		//aabb2.max.y = (std::max)(aabb2.min.y, aabb2.max.y);
+		//aabb2.min.z = (std::min)(aabb2.min.z, aabb2.max.z);
+		//aabb2.max.z = (std::max)(aabb2.min.z, aabb2.max.z);
 
 		ImGui::End();
 
@@ -150,7 +157,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		if (IsCollision(aabb1, aabb2))
+		if (IsCollision(aabb1, sphere))
 		{
 			color = RED;
 		}
@@ -172,9 +179,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewProject, viewportMat);
 
 		DrawAABB(aabb1, viewProject, viewportMat, color);
-		DrawAABB(aabb2, viewProject, viewportMat, WHITE);
+		DrawSphere(sphere, viewProject, viewportMat, WHITE);
 
-		
+		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), color);
 		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
@@ -405,6 +412,20 @@ bool IsCollision(const AABB& aabb1, const AABB& aabb2)
 	{
 		return true;
 	}
+	return false;
+}
+
+bool IsCollision(const AABB& aabb, const Sphere& sphere)
+{
+	MyVec3 closestPoint{ std::clamp(sphere.ceneter.x,aabb.min.x,aabb.max.x),
+		std::clamp(sphere.ceneter.y,aabb.min.y,aabb.max.y),
+		std::clamp(sphere.ceneter.z,aabb.min.z,aabb.max.z) };
+	float leng = (closestPoint - sphere.ceneter).Lenght();
+	if (leng<=sphere.radius)
+	{
+		return true;
+	}
+
 	return false;
 }
 
