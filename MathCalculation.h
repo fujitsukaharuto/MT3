@@ -41,6 +41,8 @@ struct AABB
 	MyVec3 max;
 };
 
+float Clampf(float x, float min, float max);
+
 /// <summary>
 /// 2次元ベクトルの2点の距離
 /// </summary>

@@ -1,5 +1,10 @@
 #include "MathCalculation.h"
 
+float Clampf(float x, float min, float max)
+{
+	return x < min ? min : (x > max ? max : x);
+}
+
 MyVec2 LengthDis(const MyVec2& endVec, const MyVec2& startVec)
 {
 	MyVec2 result{};

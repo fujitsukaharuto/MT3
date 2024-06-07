@@ -435,16 +435,16 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 	/*assert(!(segument.diff.x == 0 && segument.diff.y == 0 && segument.diff.z == 0));*/
 	if ((segument.diff.x == 0) && (segument.diff.y == 0) && (segument.diff.z == 0))
 	{
-		if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x)&&
-			(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y)&&
+		if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+			(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y) &&
 			(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
 		{
 			return true;
 		}
 		return false;
 	}
-	
-	if (segument.diff.x==0)
+
+	if (segument.diff.x == 0)
 	{
 		if (!(segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x))
 		{
@@ -488,8 +488,28 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfarz = max(tzmin, tzmax);
 		float tmin = max(tneary, tnearz);
 		float tmax = min(tfary, tfarz);
-		if (tmin<=tmax)
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
+		if (tmin <= tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y) &&
+					(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y) &&
+					(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
@@ -520,8 +540,8 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 			if ((segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
 			{
 				if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) ||
-					((segument.origin.x+segument.diff.x) >= aabb.min.x && (segument.origin.x + segument.diff.x) <= aabb.max.x)||
-					(segument.origin.x <= aabb.min.x && (segument.origin.x + segument.diff.x) >= aabb.max.x)||
+					((segument.origin.x + segument.diff.x) >= aabb.min.x && (segument.origin.x + segument.diff.x) <= aabb.max.x) ||
+					(segument.origin.x <= aabb.min.x && (segument.origin.x + segument.diff.x) >= aabb.max.x) ||
 					((segument.origin.x + segument.diff.x) <= aabb.min.x && segument.origin.x >= aabb.max.x))
 				{
 					return true;
@@ -539,8 +559,28 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfarz = max(tzmin, tzmax);
 		float tmin = max(tnearx, tnearz);
 		float tmax = min(tfarx, tfarz);
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
 		if (tmin <= tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+					(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+					(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
@@ -590,32 +630,72 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfary = max(tymin, tymax);
 		float tmin = max(tnearx, tneary);
 		float tmax = min(tfarx, tfary);
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
 		if (tmin <= tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+					(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+					(segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
 	}
-	
+
 	float txmin = (aabb.min.x - segument.origin.x) / segument.diff.x;
 	float txmax = (aabb.max.x - segument.origin.x) / segument.diff.x;
 	float tymin = (aabb.min.y - segument.origin.y) / segument.diff.y;
 	float tymax = (aabb.max.y - segument.origin.y) / segument.diff.y;
 	float tzmin = (aabb.min.z - segument.origin.z) / segument.diff.z;
 	float tzmax = (aabb.max.z - segument.origin.z) / segument.diff.z;
-
 	float tnearx = min(txmin, txmax);
 	float tneary = min(tymin, tymax);
 	float tnearz = min(tzmin, tzmax);
-
 	float tfarx = max(txmin, txmax);
 	float tfary = max(tymin, tymax);
 	float tfarz = max(tzmin, tzmax);
 
 	float tmin = max(max(tnearx, tneary), tnearz);
+	tmin = Clampf(tmin, 0.0f, 1.0f);
 	float tmax = min(min(tfarx, tfary), tfarz);
+	tmax = Clampf(tmax, 0.0f, 1.0f);
 	if (tmin <= tmax)
 	{
+		if (tmin == 0 && tmax == 0)
+		{
+			if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+				(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y) &&
+				(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+			{
+				return true;
+			}
+			return false;
+		}
+		if (tmin == 1 && tmax == 1)
+		{
+			if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+				(segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y) &&
+				(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+			{
+				return true;
+			}
+			return false;
+		}
 		return true;
 	}
 
