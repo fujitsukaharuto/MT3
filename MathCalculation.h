@@ -41,6 +41,13 @@ struct AABB
 	MyVec3 max;
 };
 
+struct OBB
+{
+	MyVec3 center;
+	MyVec3 orientations[3];
+	MyVec3 size;
+};
+
 /// <summary>
 /// 2次元ベクトルの2点の距離
 /// </summary>
