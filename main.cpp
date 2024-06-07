@@ -22,6 +22,7 @@ bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 bool IsCollision(const AABB& aabb, const Sphere& sphere);
 bool IsCollision(const AABB& aabb, const Segument& segument);
 bool IsCollision(const OBB& obb, const Sphere& sphere);
+bool IsCollision(const OBB& obb, const Segument& segu);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
@@ -48,14 +49,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	uint32_t color = 0xffffffff;
 
-	/*Segument segument{};
+	Segument segument{};
 	segument.origin = { -0.56f,0.0f,0.0f };
 	segument.diff = { 1.0f,0.5f,0.2f };
-	float lenght = 1.0f;*/
+	float lenght = 1.0f;
 
 	/*Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };*/
 
-	Sphere sphere{ {0.5f,0.5f,0.5f},0.4f };
+	/*Sphere sphere{ {0.5f,0.5f,0.5f},0.4f };*/
 
 	/*AABB aabb1{
 		.min{-0.5f,-0.5f,-0.5f},
@@ -100,10 +101,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
-		/*ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
+		ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
 		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
-		lenght = MyVec3(segument.diff - segument.origin).Lenght();
-		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);*/
+		lenght = MyVec3(segument.diff).Lenght();
+		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);
 		
 		/*ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
 		ImGui::DragFloat3("Triangle v2", &triangle.vertices[1].x,0.01f);
@@ -113,8 +114,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		plane.normal = plane.normal.Normalize();
 		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);*/
 
-		ImGui::DragFloat3("sphere center", &sphere.ceneter.x, 0.01f, -3.0f, 3.0f);
-		ImGui::DragFloat("sphere radius", &sphere.radius, 0.01f, 0.0f, 3.0f);
+		/*ImGui::DragFloat3("sphere center", &sphere.ceneter.x, 0.01f, -3.0f, 3.0f);
+		ImGui::DragFloat("sphere radius", &sphere.radius, 0.01f, 0.0f, 3.0f);*/
 
 		/*ImGui::DragFloat3("a_min", &aabb1.min.x, 0.01f, -3.0f, 3.0f);
 		ImGui::DragFloat3("a_max", &aabb1.max.x, 0.01f, -3.0f, 3.0f);
@@ -187,10 +188,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
+		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);
 
-		if (IsCollision(obb, sphere))
+		if (IsCollision(obb, segument))
 		{
 			color = RED;
 		}
@@ -212,12 +213,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewProject, viewportMat);
 
 		/*DrawAABB(aabb1, viewProject, viewportMat, color);*/
-		/*Novice::DrawLine(int(originPoint.x), int(originPoint.y),
-			int(diffPoint.x), int(diffPoint.y), WHITE);*/
+		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+			int(diffPoint.x), int(diffPoint.y), WHITE);
 
 		DrawOBB(obb, viewProject, viewportMat, color);
 
-		DrawSphere(sphere, viewProject, viewportMat, WHITE);
+		/*DrawSphere(sphere, viewProject, viewportMat, WHITE);*/
 		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
 		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
 
@@ -522,8 +523,28 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfarz = max(tzmin, tzmax);
 		float tmin = max(tneary, tnearz);
 		float tmax = min(tfary, tfarz);
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
 		if (tmin<=tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y) &&
+					(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y) &&
+					(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
@@ -573,8 +594,28 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfarz = max(tzmin, tzmax);
 		float tmin = max(tnearx, tnearz);
 		float tmax = min(tfarx, tfarz);
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
 		if (tmin <= tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+					(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+					(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
@@ -624,8 +665,28 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 		float tfary = max(tymin, tymax);
 		float tmin = max(tnearx, tneary);
 		float tmax = min(tfarx, tfary);
+		tmin = Clampf(tmin, 0.0f, 1.0f);
+		tmax = Clampf(tmax, 0.0f, 1.0f);
 		if (tmin <= tmax)
 		{
+			if (tmin == 0 && tmax == 0)
+			{
+				if ((segument.origin.x >= aabb.min.x && segument.origin.x <= aabb.max.x) &&
+					(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y))
+				{
+					return true;
+				}
+				return false;
+			}
+			if (tmin == 1 && tmax == 1)
+			{
+				if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+					(segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y))
+				{
+					return true;
+				}
+				return false;
+			}
 			return true;
 		}
 		return false;
@@ -637,19 +698,39 @@ bool IsCollision(const AABB& aabb, const Segument& segument)
 	float tymax = (aabb.max.y - segument.origin.y) / segument.diff.y;
 	float tzmin = (aabb.min.z - segument.origin.z) / segument.diff.z;
 	float tzmax = (aabb.max.z - segument.origin.z) / segument.diff.z;
-
 	float tnearx = min(txmin, txmax);
 	float tneary = min(tymin, tymax);
 	float tnearz = min(tzmin, tzmax);
-
 	float tfarx = max(txmin, txmax);
 	float tfary = max(tymin, tymax);
 	float tfarz = max(tzmin, tzmax);
 
 	float tmin = max(max(tnearx, tneary), tnearz);
+	tmin=Clampf(tmin, 0.0f, 1.0f);
 	float tmax = min(min(tfarx, tfary), tfarz);
+	tmax=Clampf(tmax, 0.0f, 1.0f);
 	if (tmin <= tmax)
 	{
+		if (tmin == 0 && tmax == 0)
+		{
+			if ((segument.origin.x>=aabb.min.x&& segument.origin.x <= aabb.max.x)&&
+				(segument.origin.y >= aabb.min.y && segument.origin.y <= aabb.max.y)&&
+				(segument.origin.z >= aabb.min.z && segument.origin.z <= aabb.max.z))
+			{
+				return true;
+			}
+			return false;
+		}
+		if (tmin == 1 && tmax == 1)
+		{
+			if ((segument.origin.x + segument.diff.x >= aabb.min.x && segument.origin.x + segument.diff.x <= aabb.max.x) &&
+				(segument.origin.y + segument.diff.y >= aabb.min.y && segument.origin.y + segument.diff.y <= aabb.max.y) &&
+				(segument.origin.z + segument.diff.z >= aabb.min.z && segument.origin.z + segument.diff.z <= aabb.max.z))
+			{
+				return true;
+			}
+			return false;
+		}
 		return true;
 	}
 
@@ -672,6 +753,26 @@ bool IsCollision(const OBB& obb, const Sphere& sphere)
 	if (IsCollision(aabbOBBLocal, sphereOBBLocal)) { return true; }
 
 	return false;
+}
+
+bool IsCollision(const OBB& obb, const Segument& segu)
+{
+	Matrix4x4 obbWorldMatrix{};
+	obbWorldMatrix = { { obb.orientations[0].x,obb.orientations[0].y,obb.orientations[0].z,0,
+		 obb.orientations[1].x,obb.orientations[1].y,obb.orientations[1].z,0,
+		 obb.orientations[2].x,obb.orientations[2].y,obb.orientations[2].z,0,
+		 obb.center.x,obb.center.y,obb.center.z,1
+	} };
+	Matrix4x4 obbWorldInverse = Inverse(obbWorldMatrix);
+	MyVec3 localOrigin = Transform(segu.origin, obbWorldInverse);
+	MyVec3 localEnd = Transform(segu.origin + segu.diff, obbWorldInverse);
+	Segument localSegument;
+	localSegument.origin = localOrigin;
+	localSegument.diff = localEnd - localOrigin;
+
+	AABB localOBB = { .min = (obb.size) * -1,.max = obb.size };
+
+	return IsCollision(localOBB, localSegument);
 }
 
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& viewport, uint32_t color)
