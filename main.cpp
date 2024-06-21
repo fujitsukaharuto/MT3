@@ -23,6 +23,7 @@ bool IsCollision(const AABB& aabb, const Sphere& sphere);
 bool IsCollision(const AABB& aabb, const Segument& segument);
 bool IsCollision(const OBB& obb, const Sphere& sphere);
 bool IsCollision(const OBB& obb, const Segument& segu);
+bool IsCollision(const OBB& obb1, const OBB& obb2);
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& port, uint32_t color);
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
@@ -49,10 +50,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	uint32_t color = 0xffffffff;
 
-	Segument segument{};
+	/*Segument segument{};
 	segument.origin = { -0.56f,0.0f,0.0f };
 	segument.diff = { 1.0f,0.5f,0.2f };
-	float lenght = 1.0f;
+	float lenght = 1.0f;*/
 
 	/*Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };*/
 
@@ -71,6 +72,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 obbrotation{ 0.0f,0.0f,0.0f };
 	OBB obb{
 		.center{-1.0f,0.0f,0.0f},
+		.orientations = {{1.0f,0.0f,0.0f},
+						{0.0f,1.0f,0.0f},
+						{0.0f,0.0f,1.0f}},
+		.size{0.5f,0.5f,0.5f}
+	};
+	MyVec3 obb2rotation{ 0.0f,0.0f,0.0f };
+	OBB obb2{
+		.center{-0.17f,0.0f,0.0f},
 		.orientations = {{1.0f,0.0f,0.0f},
 						{0.0f,1.0f,0.0f},
 						{0.0f,0.0f,1.0f}},
@@ -101,10 +110,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
-		ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
-		ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
-		lenght = MyVec3(segument.diff).Lenght();
-		ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);
+		//ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
+		//ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
+		//lenght = MyVec3(segument.diff).Lenght();
+		//ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);
 		
 		/*ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
 		ImGui::DragFloat3("Triangle v2", &triangle.vertices[1].x,0.01f);
@@ -155,6 +164,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::DragFloat3("obb center", &obb.center.x, 0.01f, -5.0f, 5.0f);
 		ImGui::DragFloat3("obb size", &obb.size.x, 0.01f, 0.0f, 2.0f);
+
+		ImGui::DragFloat3("obb2 object rotate", &obb2rotation.x, 0.01f, -20.0f, 20.0f);
+		Matrix4x4 rotateMatrix2 = Multiply(MakeRotateXMatrix(obb2rotation.x), Multiply(MakeRotateYMatrix(obb2rotation.y), MakeRotateZMatrix(obb2rotation.z)));
+
+		obb2.orientations[0].x = rotateMatrix2.m[0][0];
+		obb2.orientations[0].y = rotateMatrix2.m[0][1];
+		obb2.orientations[0].z = rotateMatrix2.m[0][2];
+
+		obb2.orientations[1].x = rotateMatrix2.m[1][0];
+		obb2.orientations[1].y = rotateMatrix2.m[1][1];
+		obb2.orientations[1].z = rotateMatrix2.m[1][2];
+
+		obb2.orientations[2].x = rotateMatrix2.m[2][0];
+		obb2.orientations[2].y = rotateMatrix2.m[2][1];
+		obb2.orientations[2].z = rotateMatrix2.m[2][2];
+
+		obb2.orientations[0] = obb2.orientations[0].Normalize();
+		obb2.orientations[1] = obb2.orientations[1].Normalize();
+		obb2.orientations[2] = obb2.orientations[2].Normalize();
+
+		ImGui::DragFloat3("obb2 center", &obb2.center.x, 0.01f, -5.0f, 5.0f);
+		ImGui::DragFloat3("obb2 size", &obb2.size.x, 0.01f, 0.0f, 2.0f);
 		ImGui::End();
 
 #endif // _DEBUG
@@ -188,10 +219,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
 
-		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);
+		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		if (IsCollision(obb, segument))
+		if (IsCollision(obb, obb2))
 		{
 			color = RED;
 		}
@@ -213,10 +244,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(viewProject, viewportMat);
 
 		/*DrawAABB(aabb1, viewProject, viewportMat, color);*/
-		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
-			int(diffPoint.x), int(diffPoint.y), WHITE);
+		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
 		DrawOBB(obb, viewProject, viewportMat, color);
+		DrawOBB(obb2, viewProject, viewportMat, WHITE);
 
 		/*DrawSphere(sphere, viewProject, viewportMat, WHITE);*/
 		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
@@ -773,6 +805,182 @@ bool IsCollision(const OBB& obb, const Segument& segu)
 	AABB localOBB = { .min = (obb.size) * -1,.max = obb.size };
 
 	return IsCollision(localOBB, localSegument);
+}
+
+bool IsCollision(const OBB& obb1, const OBB& obb2)
+{
+	MyVec3 obb1vertices[8] = {};
+	obb1vertices[0] = { -obb1.size.x,-obb1.size.y,-obb1.size.z };
+	obb1vertices[1] = { obb1.size.x,-obb1.size.y,-obb1.size.z };
+	obb1vertices[2] = { obb1.size.x,-obb1.size.y,obb1.size.z };
+	obb1vertices[3] = { -obb1.size.x,-obb1.size.y,obb1.size.z };
+	obb1vertices[4] = { obb1.size.x,obb1.size.y,obb1.size.z };
+	obb1vertices[5] = { -obb1.size.x,obb1.size.y,obb1.size.z };
+	obb1vertices[6] = { -obb1.size.x,obb1.size.y,-obb1.size.z };
+	obb1vertices[7] = { obb1.size.x,obb1.size.y,-obb1.size.z };
+
+	MyVec3 obb2vertices[8] = {};
+	obb2vertices[0] = { -obb2.size.x,-obb2.size.y,-obb2.size.z };
+	obb2vertices[1] = { obb2.size.x,-obb2.size.y,-obb2.size.z };
+	obb2vertices[2] = { obb2.size.x,-obb2.size.y,obb2.size.z };
+	obb2vertices[3] = { -obb2.size.x,-obb2.size.y,obb2.size.z };
+	obb2vertices[4] = { obb2.size.x,obb2.size.y,obb2.size.z };
+	obb2vertices[5] = { -obb2.size.x,obb2.size.y,obb2.size.z };
+	obb2vertices[6] = { -obb2.size.x,obb2.size.y,-obb2.size.z };
+	obb2vertices[7] = { obb2.size.x,obb2.size.y,-obb2.size.z };
+
+	Matrix4x4 obb1WorldMatrix{};
+	obb1WorldMatrix = { { obb1.orientations[0].x,obb1.orientations[0].y,obb1.orientations[0].z,0,
+		 obb1.orientations[1].x,obb1.orientations[1].y,obb1.orientations[1].z,0,
+		 obb1.orientations[2].x,obb1.orientations[2].y,obb1.orientations[2].z,0,
+		 obb1.center.x,obb1.center.y,obb1.center.z,1
+	} };
+	for (int i = 0; i < 8; i++)
+	{
+		obb1vertices[i] = Transform(obb1vertices[i], obb1WorldMatrix);
+	}
+
+	Matrix4x4 obb2WorldMatrix{};
+	obb2WorldMatrix = { { obb2.orientations[0].x,obb2.orientations[0].y,obb2.orientations[0].z,0,
+		 obb2.orientations[1].x,obb2.orientations[1].y,obb2.orientations[1].z,0,
+		 obb2.orientations[2].x,obb2.orientations[2].y,obb2.orientations[2].z,0,
+		 obb2.center.x,obb2.center.y,obb2.center.z,1
+	} };
+	for (int i = 0; i < 8; i++)
+	{
+		obb2vertices[i] = Transform(obb2vertices[i], obb2WorldMatrix);
+	}
+
+	MyVec3 obb1ProjectV1[8];
+	MyVec3 obb1ProjectV2[8];
+	MyVec3 obb1ProjectV3[8];
+	MyVec3 obb1ProjectV4[8];
+	MyVec3 obb1ProjectV5[8];
+	MyVec3 obb1ProjectV6[8];
+	for (int i = 0; i < 8; i++)
+	{
+
+		obb1ProjectV1[i] = Project(obb1vertices[i], obb1.orientations[0]);//x
+		obb1ProjectV2[i] = Project(obb1vertices[i], obb1.orientations[1]);//y
+		obb1ProjectV3[i] = Project(obb1vertices[i], obb1.orientations[2]);//z
+		obb1ProjectV4[i] = Project(obb1vertices[i], obb2.orientations[0]);//x
+		obb1ProjectV5[i] = Project(obb1vertices[i], obb2.orientations[1]);//y
+		obb1ProjectV6[i] = Project(obb1vertices[i], obb2.orientations[2]);//z
+	}
+	float min1v1 = obb1ProjectV1[0].x;
+	float min1v2 = obb1ProjectV2[0].y;
+	float min1v3 = obb1ProjectV3[0].z;
+	float min1v4 = obb1ProjectV4[0].x;
+	float min1v5 = obb1ProjectV5[0].y;
+	float min1v6 = obb1ProjectV6[0].z;
+
+	float max1v1 = obb1ProjectV1[0].x;
+	float max1v2 = obb1ProjectV2[0].y;
+	float max1v3 = obb1ProjectV3[0].z;
+	float max1v4 = obb1ProjectV4[0].x;
+	float max1v5 = obb1ProjectV5[0].y;
+	float max1v6 = obb1ProjectV6[0].z;
+	for (int i = 1; i < 8; i++)
+	{
+		min1v1 = ((std::min)(min1v1, obb1ProjectV1[i].x));
+		min1v2 = ((std::min)(min1v2, obb1ProjectV2[i].y));
+		min1v3 = ((std::min)(min1v3, obb1ProjectV3[i].z));
+		min1v4 = ((std::min)(min1v4, obb1ProjectV4[i].x));
+		min1v5 = ((std::min)(min1v5, obb1ProjectV5[i].y));
+		min1v6 = ((std::min)(min1v6, obb1ProjectV6[i].z));
+
+		max1v1 = ((std::max)(max1v1, obb1ProjectV1[i].x));
+		max1v2 = ((std::max)(max1v2, obb1ProjectV2[i].y));
+		max1v3 = ((std::max)(max1v3, obb1ProjectV3[i].z));
+		max1v4 = ((std::max)(max1v4, obb1ProjectV4[i].x));
+		max1v5 = ((std::max)(max1v5, obb1ProjectV5[i].y));
+		max1v6 = ((std::max)(max1v6, obb1ProjectV6[i].z));
+	}
+	float L1v1 = max1v1 - min1v1;
+	float L1v2 = max1v2 - min1v2;
+	float L1v3 = max1v3 - min1v3;
+	float L1v4 = max1v4 - min1v4;
+	float L1v5 = max1v5 - min1v5;
+	float L1v6 = max1v6 - min1v6;
+
+
+	MyVec3 obb2ProjectV1[8];
+	MyVec3 obb2ProjectV2[8];
+	MyVec3 obb2ProjectV3[8];
+	MyVec3 obb2ProjectV4[8];
+	MyVec3 obb2ProjectV5[8];
+	MyVec3 obb2ProjectV6[8];
+	for (int i = 0; i < 8; i++)
+	{
+
+		obb2ProjectV1[i] = Project(obb2vertices[i], obb1.orientations[0]);
+		obb2ProjectV2[i] = Project(obb2vertices[i], obb1.orientations[1]);
+		obb2ProjectV3[i] = Project(obb2vertices[i], obb1.orientations[2]);
+		obb2ProjectV4[i] = Project(obb2vertices[i], obb2.orientations[0]);
+		obb2ProjectV5[i] = Project(obb2vertices[i], obb2.orientations[1]);
+		obb2ProjectV6[i] = Project(obb2vertices[i], obb2.orientations[2]);
+	}
+	float min2v1 = obb2ProjectV1[0].x;
+	float min2v2 = obb2ProjectV2[0].y;
+	float min2v3 = obb2ProjectV3[0].z;
+	float min2v4 = obb2ProjectV4[0].x;
+	float min2v5 = obb2ProjectV5[0].y;
+	float min2v6 = obb2ProjectV6[0].z;
+
+	float max2v1 = obb2ProjectV1[0].x;
+	float max2v2 = obb2ProjectV2[0].y;
+	float max2v3 = obb2ProjectV3[0].z;
+	float max2v4 = obb2ProjectV4[0].x;
+	float max2v5 = obb2ProjectV5[0].y;
+	float max2v6 = obb2ProjectV6[0].z;
+	for (int i = 1; i < 8; i++)
+	{
+		min2v1 = ((std::min)(min2v1, obb2ProjectV1[i].x));
+		min2v2 = ((std::min)(min2v2, obb2ProjectV2[i].y));
+		min2v3 = ((std::min)(min2v3, obb2ProjectV3[i].z));
+		min2v4 = ((std::min)(min2v4, obb2ProjectV4[i].x));
+		min2v5 = ((std::min)(min2v5, obb2ProjectV5[i].y));
+		min2v6 = ((std::min)(min2v6, obb2ProjectV6[i].z));
+
+		max2v1 = ((std::max)(max2v1, obb2ProjectV1[i].x));
+		max2v2 = ((std::max)(max2v2, obb2ProjectV2[i].y));
+		max2v3 = ((std::max)(max2v3, obb2ProjectV3[i].z));
+		max2v4 = ((std::max)(max2v4, obb2ProjectV4[i].x));
+		max2v5 = ((std::max)(max2v5, obb2ProjectV5[i].y));
+		max2v6 = ((std::max)(max2v6, obb2ProjectV6[i].z));
+	}
+	float L2v1 = max2v1 - min2v1;
+	float L2v2 = max2v2 - min2v2;
+	float L2v3 = max2v3 - min2v3;
+	float L2v4 = max2v4 - min2v4;
+	float L2v5 = max2v5 - min2v5;
+	float L2v6 = max2v6 - min2v6;
+
+
+	float sumSpanv1 = L1v1 + L2v1;
+	float sumSpanv2 = L1v2 + L2v2;
+	float sumSpanv3 = L1v3 + L2v3;
+	float sumSpanv4 = L1v4 + L2v4;
+	float sumSpanv5 = L1v5 + L2v5;
+	float sumSpanv6 = L1v6 + L2v6;
+
+	float longSpanv1 = (std::max)(max1v1, max2v1) - (std::min)(min1v1, min2v1);
+	float longSpanv2 = (std::max)(max1v2, max2v2) - (std::min)(min1v2, min2v2);
+	float longSpanv3 = (std::max)(max1v3, max2v3) - (std::min)(min1v3, min2v3);
+	float longSpanv4 = (std::max)(max1v4, max2v4) - (std::min)(min1v4, min2v4);
+	float longSpanv5 = (std::max)(max1v5, max2v5) - (std::min)(min1v5, min2v5);
+	float longSpanv6 = (std::max)(max1v6, max2v6) - (std::min)(min1v6, min2v6);
+	if (sumSpanv1 < longSpanv1 || sumSpanv2 < longSpanv2 || sumSpanv3 < longSpanv3
+		)
+	{
+		return false;
+	}
+	if (sumSpanv4 < longSpanv4 || sumSpanv5 < longSpanv5 || sumSpanv6 < longSpanv6)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& viewport, uint32_t color)
