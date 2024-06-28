@@ -24,6 +24,8 @@ public:
 		return *this;
 	}
 
+	bool operator==(const MyVec3& v) const { return (x == v.x && y == v.y && z == v.z); }
+
 	MyVec3 operator+(const MyVec3& v) const { return MyVec3(x + v.x, y + v.y, z + v.z); }
 	MyVec3 operator-(const MyVec3& v) const { return MyVec3(x - v.x, y - v.y, z - v.z); }
 	MyVec3 operator*(float k) const { return MyVec3(x * k, y * k, z * k); }

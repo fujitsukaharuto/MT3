@@ -28,6 +28,8 @@ void DrawPlane(const Plane& plane, const Matrix4x4& vieProMat, const Matrix4x4& 
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjection, Matrix4x4& viewport, uint32_t color);
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
 void DrawOBB(const OBB& obb, const Matrix4x4& viewprojection, const Matrix4x4& viewPort, uint32_t color);
+void DrawBezier(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
+void DrawCatmullRom(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -39,16 +41,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 translate{ 0.0f,0.0f,0.0f };
 
 	MyVec3 cameraPosition{ 0.0f,0.0f,-10.49f };
-	MyVec3 camerarota{ 0.58f,-4.61f,0.0f };
+	MyVec3 camerarota{ 0.5f,0.0f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
-
+	bool isCatmullRom = false;
 
 	/*Plane plane{};
 	plane.normal = { 1.0f,1.0f,0.0f };
 	plane.distance = 1.0f;*/
 
-	uint32_t color = 0xffffffff;
+	uint32_t color = 0x0000ffff;
 
 	/*Segument segument{};
 	segument.origin = { -0.56f,0.0f,0.0f };
@@ -69,22 +71,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		.max{1.0f,1.0f,1.0f},
 	};*/
 
-	MyVec3 obbrotation{ 0.0f,0.0f,0.0f };
+	/*MyVec3 obbrotation{ 0.0f,0.0f,0.0f };
 	OBB obb{
 		.center{-1.0f,0.0f,0.0f},
 		.orientations = {{1.0f,0.0f,0.0f},
 						{0.0f,1.0f,0.0f},
 						{0.0f,0.0f,1.0f}},
 		.size{0.5f,0.5f,0.5f}
-	};
-	MyVec3 obb2rotation{ 0.0f,0.0f,0.0f };
+	};*/
+	/*MyVec3 obb2rotation{ 0.0f,0.0f,0.0f };
 	OBB obb2{
 		.center{-0.17f,0.0f,0.0f},
 		.orientations = {{1.0f,0.0f,0.0f},
 						{0.0f,1.0f,0.0f},
 						{0.0f,0.0f,1.0f}},
 		.size{0.5f,0.5f,0.5f}
+	};*/
+
+	std::vector<MyVec3> controlPoints =
+	{
+		{-0.8f,0.58f,1.0f},
+		{1.76f,1.0f,-0.3f},
+		{0.94f,-0.7f,2.3f},
 	};
+
+	Sphere sphere1{ controlPoints[0],0.01f};
+	Sphere sphere2{ controlPoints[1],0.01f};
+	Sphere sphere3{ controlPoints[2],0.01f};
+
+
+	std::vector<MyVec3> controlPointsCatmull =
+	{
+		{-0.8f,0.58f,1.0f},
+		{1.76f,1.0f,-0.3f},
+		{0.94f,-0.7f,2.3f},
+		{-0.53f,-0.26f,-0.15f},
+	};
+
+	Sphere sphereCat1{ controlPointsCatmull[0],0.01f };
+	Sphere sphereCat2{ controlPointsCatmull[1],0.01f };
+	Sphere sphereCat3{ controlPointsCatmull[2],0.01f };
+	Sphere sphereCat4{ controlPointsCatmull[3],0.01f };
 
 
 	// キー入力結果を受け取る箱
@@ -143,7 +170,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//aabb2.min.z = (std::min)(aabb2.min.z, aabb2.max.z);
 		//aabb2.max.z = (std::max)(aabb2.min.z, aabb2.max.z);
 
-		ImGui::DragFloat3("obb object rotate", &obbrotation.x, 0.01f, -20.0f, 20.0f);
+		/*ImGui::DragFloat3("obb object rotate", &obbrotation.x, 0.01f, -20.0f, 20.0f);
 		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(obbrotation.x), Multiply(MakeRotateYMatrix(obbrotation.y), MakeRotateZMatrix(obbrotation.z)));
 		
 		obb.orientations[0].x = rotateMatrix.m[0][0];
@@ -163,9 +190,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		obb.orientations[2] = obb.orientations[2].Normalize();
 
 		ImGui::DragFloat3("obb center", &obb.center.x, 0.01f, -5.0f, 5.0f);
-		ImGui::DragFloat3("obb size", &obb.size.x, 0.01f, 0.0f, 2.0f);
+		ImGui::DragFloat3("obb size", &obb.size.x, 0.01f, 0.0f, 2.0f);*/
 
-		ImGui::DragFloat3("obb2 object rotate", &obb2rotation.x, 0.01f, -20.0f, 20.0f);
+		/*ImGui::DragFloat3("obb2 object rotate", &obb2rotation.x, 0.01f, -20.0f, 20.0f);
 		Matrix4x4 rotateMatrix2 = Multiply(MakeRotateXMatrix(obb2rotation.x), Multiply(MakeRotateYMatrix(obb2rotation.y), MakeRotateZMatrix(obb2rotation.z)));
 
 		obb2.orientations[0].x = rotateMatrix2.m[0][0];
@@ -185,7 +212,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		obb2.orientations[2] = obb2.orientations[2].Normalize();
 
 		ImGui::DragFloat3("obb2 center", &obb2.center.x, 0.01f, -5.0f, 5.0f);
-		ImGui::DragFloat3("obb2 size", &obb2.size.x, 0.01f, 0.0f, 2.0f);
+		ImGui::DragFloat3("obb2 size", &obb2.size.x, 0.01f, 0.0f, 2.0f);*/
+		
+		ImGui::Checkbox("isDrawCatmull", &isCatmullRom);
+		if (!isCatmullRom)
+		{
+			ImGui::DragFloat3("control1", &controlPoints[0].x, 0.01f);
+			sphere1.ceneter = controlPoints[0];
+			ImGui::DragFloat3("control2", &controlPoints[1].x, 0.01f);
+			sphere2.ceneter = controlPoints[1];
+			ImGui::DragFloat3("control3", &controlPoints[2].x, 0.01f);
+			sphere3.ceneter = controlPoints[2];
+		}
+		else
+		{
+			ImGui::DragFloat3("point1", &controlPointsCatmull[0].x, 0.01f);
+			sphereCat1.ceneter = controlPointsCatmull[0];
+			ImGui::DragFloat3("point2", &controlPointsCatmull[1].x, 0.01f);
+			sphereCat2.ceneter = controlPointsCatmull[1];
+			ImGui::DragFloat3("point3", &controlPointsCatmull[2].x, 0.01f);
+			sphereCat3.ceneter = controlPointsCatmull[2];
+			ImGui::DragFloat3("point4", &controlPointsCatmull[3].x, 0.01f);
+			sphereCat4.ceneter = controlPointsCatmull[3];
+		}
+
 		ImGui::End();
 
 #endif // _DEBUG
@@ -222,14 +272,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		if (IsCollision(obb, obb2))
+		/*if (IsCollision(obb, obb2))
 		{
 			color = RED;
 		}
 		else
 		{
 			color = WHITE;
-		}
+		}*/
 		
 		
 
@@ -247,12 +297,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
-		DrawOBB(obb, viewProject, viewportMat, color);
-		DrawOBB(obb2, viewProject, viewportMat, WHITE);
+		//DrawOBB(obb, viewProject, viewportMat, color);
+		//DrawOBB(obb2, viewProject, viewportMat, WHITE);
 
 		/*DrawSphere(sphere, viewProject, viewportMat, WHITE);*/
 		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
 		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
+		if (!isCatmullRom)
+		{
+			DrawBezier(controlPoints, viewProject, viewportMat, color);
+			DrawSphere(sphere1, viewProject, viewportMat, BLACK);
+			DrawSphere(sphere2, viewProject, viewportMat, BLACK);
+			DrawSphere(sphere3, viewProject, viewportMat, BLACK);
+		}
+		else
+		{
+			DrawCatmullRom(controlPointsCatmull, viewProject, viewportMat, color);
+			DrawSphere(sphereCat1, viewProject, viewportMat, BLACK);
+			DrawSphere(sphereCat2, viewProject, viewportMat, BLACK);
+			DrawSphere(sphereCat3, viewProject, viewportMat, BLACK);
+			DrawSphere(sphereCat4, viewProject, viewportMat, BLACK);
+		}
 
 		///
 		/// ↑描画処理ここまで
@@ -970,8 +1035,7 @@ bool IsCollision(const OBB& obb1, const OBB& obb2)
 	float longSpanv4 = (std::max)(max1v4, max2v4) - (std::min)(min1v4, min2v4);
 	float longSpanv5 = (std::max)(max1v5, max2v5) - (std::min)(min1v5, min2v5);
 	float longSpanv6 = (std::max)(max1v6, max2v6) - (std::min)(min1v6, min2v6);
-	if (sumSpanv1 < longSpanv1 || sumSpanv2 < longSpanv2 || sumSpanv3 < longSpanv3
-		)
+	if (sumSpanv1 < longSpanv1 || sumSpanv2 < longSpanv2 || sumSpanv3 < longSpanv3)
 	{
 		return false;
 	}
@@ -1123,5 +1187,52 @@ void DrawOBB(const OBB& obb, const Matrix4x4& viewprojection, const Matrix4x4& v
 		int(points[4].x), int(points[4].y), color);
 	Novice::DrawLine(int(points[3].x), int(points[3].y),
 		int(points[5].x), int(points[5].y), color);
+
+}
+
+void DrawBezier(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color)
+{
+	float t = 0;
+	const size_t segumentCount = 50;
+	std::vector<MyVec3> drawpoint;
+	for (int i = 0; i <= segumentCount; i++)
+	{
+		MyVec3 p0p1 = Lerp(control[0], control[1], t);
+		MyVec3 p1p2 = Lerp(control[1], control[2], t);
+		MyVec3 p = Lerp(p0p1, p1p2, t);
+		t += 0.02f;
+
+		p = Transform(Transform(p, viewProjection), viewPort);
+		drawpoint.push_back(p);
+	}
+	for (int i = 0; i < drawpoint.size()-1;)
+	{
+		int index1 = i;
+		i++;
+		int index2 = i;
+		Novice::DrawLine(int(drawpoint[index1].x), int(drawpoint[index1].y), int(drawpoint[index2].x), int(drawpoint[index2].y), color);
+	}
+
+}
+
+void DrawCatmullRom(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color)
+{
+	std::vector<MyVec3> drawpoint;
+	const size_t segumentCount = 100;
+	float t = 0;
+	for (int i = 0; i <= segumentCount; i++)
+	{
+		MyVec3 pos = CatmullRom(control, t);
+		pos = Transform(Transform(pos, viewProjection), viewPort);
+		drawpoint.push_back(pos);
+		t += 0.01f;
+	}
+	for (int i = 0; i < drawpoint.size()-1;)
+	{
+		int index1 = i;
+		i++;
+		int index2 = i;
+		Novice::DrawLine(int(drawpoint[index1].x), int(drawpoint[index1].y), int(drawpoint[index2].x), int(drawpoint[index2].y), color);
+	}
 
 }

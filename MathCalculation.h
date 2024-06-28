@@ -1,6 +1,8 @@
 ﻿#pragma once
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
+#include <vector>
 #include <assert.h>
 
 #include "MyVec2.h"
@@ -87,3 +89,13 @@ MyVec3 Project(const MyVec3& v1, const MyVec3& v2);
 MyVec3 ClosestPoint(const MyVec3& point, const Segument& segument);
 
 MyVec3 Perpendicular(const MyVec3& vector);
+
+MyVec3 Lerp(const MyVec3& v1, const MyVec3& v2, float t);
+
+MyVec3 Sleap(const MyVec3& v1, const MyVec3& v2, float t);
+
+float Clamp(float x, float min, float max);
+
+MyVec3 CatmullRomPoint(const MyVec3& p0, const MyVec3& p1, const MyVec3& p2, const MyVec3& p3, float t);
+
+MyVec3 CatmullRom(const std::vector<MyVec3>& control, float t);
