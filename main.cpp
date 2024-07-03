@@ -44,13 +44,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 camerarota{ 0.5f,0.0f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
-	bool isCatmullRom = false;
+	/*bool isCatmullRom = false;*/
 
 	/*Plane plane{};
 	plane.normal = { 1.0f,1.0f,0.0f };
 	plane.distance = 1.0f;*/
 
-	uint32_t color = 0x0000ffff;
+	/*uint32_t color = 0xffffffff;*/
 
 	/*Segument segument{};
 	segument.origin = { -0.56f,0.0f,0.0f };
@@ -88,7 +88,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		.size{0.5f,0.5f,0.5f}
 	};*/
 
-	std::vector<MyVec3> controlPoints =
+	/*std::vector<MyVec3> controlPoints =
 	{
 		{-0.8f,0.58f,1.0f},
 		{1.76f,1.0f,-0.3f},
@@ -111,8 +111,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sphere sphereCat1{ controlPointsCatmull[0],0.01f };
 	Sphere sphereCat2{ controlPointsCatmull[1],0.01f };
 	Sphere sphereCat3{ controlPointsCatmull[2],0.01f };
-	Sphere sphereCat4{ controlPointsCatmull[3],0.01f };
+	Sphere sphereCat4{ controlPointsCatmull[3],0.01f };*/
 
+
+	MyVec3 translates[3] = {
+		{0.2f,1.0f,0.0f},
+		{0.4f,0.0f,0.0f},
+		{0.3f,0.0f,0.0f}
+	};
+
+	MyVec3 rotates[3] = {
+		{0.0f,1.0f,-6.8f},
+		{0.0f,0.0f,-1.4f},
+		{0.0f,0.0f,0.0f}
+	};
+
+	MyVec3 scales[3] = {
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f},
+		{1.0f,1.0f,1.0f}
+	};
+
+	Sphere sphereS = { translates[0],0.05f };
+	Sphere sphereE = { translates[1],0.05f };
+	Sphere sphereH = { translates[2],0.05f };
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -214,7 +236,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("obb2 center", &obb2.center.x, 0.01f, -5.0f, 5.0f);
 		ImGui::DragFloat3("obb2 size", &obb2.size.x, 0.01f, 0.0f, 2.0f);*/
 		
-		ImGui::Checkbox("isDrawCatmull", &isCatmullRom);
+		/*ImGui::Checkbox("isDrawCatmull", &isCatmullRom);
 		if (!isCatmullRom)
 		{
 			ImGui::DragFloat3("control1", &controlPoints[0].x, 0.01f);
@@ -234,7 +256,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sphereCat3.ceneter = controlPointsCatmull[2];
 			ImGui::DragFloat3("point4", &controlPointsCatmull[3].x, 0.01f);
 			sphereCat4.ceneter = controlPointsCatmull[3];
-		}
+		}*/
+		ImGui::DragFloat3("S_trans", &translates[0].x, 0.01f);
+		ImGui::DragFloat3("S_rotate", &rotates[0].x, 0.01f);
+		ImGui::DragFloat3("S_scale", &scales[0].x, 0.01f);
+
+		ImGui::DragFloat3("E_trans", &translates[1].x, 0.01f);
+		ImGui::DragFloat3("E_rotate", &rotates[1].x, 0.01f);
+		ImGui::DragFloat3("E_scale", &scales[1].x, 0.01f);
+		
+		ImGui::DragFloat3("H_trans", &translates[2].x, 0.01f);
+		ImGui::DragFloat3("H_rotate", &rotates[2].x, 0.01f);
+		ImGui::DragFloat3("H_scale", &scales[2].x, 0.01f);
+
 
 		ImGui::End();
 
@@ -257,6 +291,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			camerarota.x += 0.01f;
 		}
 
+
+		Matrix4x4 worldMatS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
+		Matrix4x4 worldMatE = MakeAffineMatrix(scales[1], rotates[1], translates[1]);
+		worldMatE = Multiply(worldMatE, worldMatS);
+		Matrix4x4 worldMatH = MakeAffineMatrix(scales[2], rotates[2], translates[2]);
+		worldMatH = Multiply(worldMatH, worldMatE);
+
+		sphereS.ceneter = { worldMatS.m[3][0],worldMatS.m[3][1],worldMatS.m[3][2] };
+		sphereE.ceneter = { worldMatE.m[3][0],worldMatE.m[3][1],worldMatE.m[3][2] };
+		sphereH.ceneter = { worldMatH.m[3][0],worldMatH.m[3][1],worldMatH.m[3][2] };
+
+
 		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
 		Matrix4x4 cameraMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
 		cameraMat = Multiply(cameraMat, MakeRotateXMatrix(camerarota.x));
@@ -272,6 +318,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
+		MyVec3 originPoint = Transform(Transform(sphereS.ceneter, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform((sphereE.ceneter), viewProject), viewportMat);
+
+		MyVec3 originPoint2 = Transform(Transform(sphereE.ceneter, viewProject), viewportMat);
+		MyVec3 diffPoint2 = Transform(Transform((sphereH.ceneter), viewProject), viewportMat);
+
 		/*if (IsCollision(obb, obb2))
 		{
 			color = RED;
@@ -281,7 +333,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			color = WHITE;
 		}*/
 		
-		
+
 
 		///
 		/// ↑更新処理ここまで
@@ -303,7 +355,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*DrawSphere(sphere, viewProject, viewportMat, WHITE);*/
 		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
 		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
-		if (!isCatmullRom)
+		/*if (!isCatmullRom)
 		{
 			DrawBezier(controlPoints, viewProject, viewportMat, color);
 			DrawSphere(sphere1, viewProject, viewportMat, BLACK);
@@ -317,7 +369,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DrawSphere(sphereCat2, viewProject, viewportMat, BLACK);
 			DrawSphere(sphereCat3, viewProject, viewportMat, BLACK);
 			DrawSphere(sphereCat4, viewProject, viewportMat, BLACK);
-		}
+		}*/
+
+
+		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+				int(diffPoint.x), int(diffPoint.y), BLACK);
+		Novice::DrawLine(int(originPoint2.x), int(originPoint2.y),
+			int(diffPoint2.x), int(diffPoint2.y), BLACK);
+
+		DrawSphere(sphereS, viewProject, viewportMat, RED);
+		DrawSphere(sphereE, viewProject, viewportMat, GREEN);
+		DrawSphere(sphereH, viewProject, viewportMat, BLUE);
 
 		///
 		/// ↑描画処理ここまで
