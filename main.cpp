@@ -31,6 +31,8 @@ void DrawOBB(const OBB& obb, const Matrix4x4& viewprojection, const Matrix4x4& v
 void DrawBezier(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
 void DrawCatmullRom(const std::vector<MyVec3> control, const Matrix4x4& viewProjection, const Matrix4x4 viewPort, uint32_t color);
 
+Matrix4x4 operator*(const Matrix4x4 a, const Matrix4x4 b) { return Multiply(a, b); }
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -114,7 +116,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Sphere sphereCat4{ controlPointsCatmull[3],0.01f };*/
 
 
-	MyVec3 translates[3] = {
+	/*MyVec3 translates[3] = {
 		{0.2f,1.0f,0.0f},
 		{0.4f,0.0f,0.0f},
 		{0.3f,0.0f,0.0f}
@@ -134,7 +136,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Sphere sphereS = { translates[0],0.05f };
 	Sphere sphereE = { translates[1],0.05f };
-	Sphere sphereH = { translates[2],0.05f };
+	Sphere sphereH = { translates[2],0.05f };*/
+
+
+	MyVec3 a{ 0.2f,1.0f,0.0f };
+	MyVec3 b{ 2.4f,3.1f,1.2f };
+	MyVec3 c = a + b;
+	MyVec3 d = a - b;
+	MyVec3 e = a * 2.4f;
+	MyVec3 rotateparameta{ 0.4f,1.43f,-0.8f };
+	Matrix4x4 rotateXMaterix = MakeRotateXMatrix(rotateparameta.x);
+	Matrix4x4 rotateYMaterix = MakeRotateYMatrix(rotateparameta.y);
+	Matrix4x4 rotateZMaterix = MakeRotateZMatrix(rotateparameta.z);
+	Matrix4x4 rotateMaterix = rotateXMaterix * rotateYMaterix * rotateZMaterix;
+
+
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -163,34 +179,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
 		//lenght = MyVec3(segument.diff).Lenght();
 		//ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);
-		
-		/*ImGui::DragFloat3("Triangle v1", &triangle.vertices[0].x,0.01f);
-		ImGui::DragFloat3("Triangle v2", &triangle.vertices[1].x,0.01f);
-		ImGui::DragFloat3("Triangle v3", &triangle.vertices[2].x,0.01f);*/
-
-		/*ImGui::DragFloat3("Plane Normal", &plane.normal.x, 0.01f);
-		plane.normal = plane.normal.Normalize();
-		ImGui::DragFloat("Plane Dis", &plane.distance, 0.01f);*/
-
-		/*ImGui::DragFloat3("sphere center", &sphere.ceneter.x, 0.01f, -3.0f, 3.0f);
-		ImGui::DragFloat("sphere radius", &sphere.radius, 0.01f, 0.0f, 3.0f);*/
-
-		/*ImGui::DragFloat3("a_min", &aabb1.min.x, 0.01f, -3.0f, 3.0f);
-		ImGui::DragFloat3("a_max", &aabb1.max.x, 0.01f, -3.0f, 3.0f);
-		aabb1.min.x = (std::min)(aabb1.min.x, aabb1.max.x);
-		aabb1.max.x = (std::max)(aabb1.min.x, aabb1.max.x);
-		aabb1.min.y = (std::min)(aabb1.min.y, aabb1.max.y);
-		aabb1.max.y = (std::max)(aabb1.min.y, aabb1.max.y);
-		aabb1.min.z = (std::min)(aabb1.min.z, aabb1.max.z);
-		aabb1.max.z = (std::max)(aabb1.min.z, aabb1.max.z);*/
-		//ImGui::DragFloat3("b_min", &aabb2.min.x, 0.1f, -3.0f, 3.0f);
-		//ImGui::DragFloat3("b_max", &aabb2.max.x, 0.1f, -3.0f, 3.0f);
-		//aabb2.min.x = (std::min)(aabb2.min.x, aabb2.max.x);
-		//aabb2.max.x = (std::max)(aabb2.min.x, aabb2.max.x);
-		//aabb2.min.y = (std::min)(aabb2.min.y, aabb2.max.y);
-		//aabb2.max.y = (std::max)(aabb2.min.y, aabb2.max.y);
-		//aabb2.min.z = (std::min)(aabb2.min.z, aabb2.max.z);
-		//aabb2.max.z = (std::max)(aabb2.min.z, aabb2.max.z);
 
 		/*ImGui::DragFloat3("obb object rotate", &obbrotation.x, 0.01f, -20.0f, 20.0f);
 		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(obbrotation.x), Multiply(MakeRotateYMatrix(obbrotation.y), MakeRotateZMatrix(obbrotation.z)));
@@ -257,7 +245,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("point4", &controlPointsCatmull[3].x, 0.01f);
 			sphereCat4.ceneter = controlPointsCatmull[3];
 		}*/
-		ImGui::DragFloat3("S_trans", &translates[0].x, 0.01f);
+		/*ImGui::DragFloat3("S_trans", &translates[0].x, 0.01f);
 		ImGui::DragFloat3("S_rotate", &rotates[0].x, 0.01f);
 		ImGui::DragFloat3("S_scale", &scales[0].x, 0.01f);
 
@@ -267,7 +255,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		ImGui::DragFloat3("H_trans", &translates[2].x, 0.01f);
 		ImGui::DragFloat3("H_rotate", &rotates[2].x, 0.01f);
-		ImGui::DragFloat3("H_scale", &scales[2].x, 0.01f);
+		ImGui::DragFloat3("H_scale", &scales[2].x, 0.01f);*/
+
+		ImGui::Text("c:%f,%f,%f", c.x, c.y, c.z);
+		ImGui::Text("d:%f,%f,%f", d.x, d.y, d.z);
+		ImGui::Text("e:%f,%f,%f", e.x, e.y, e.z);
+		ImGui::Text(
+			"matrix:\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
+			rotateMaterix.m[0][0], rotateMaterix.m[0][1], rotateMaterix.m[0][2], rotateMaterix.m[0][3],
+			rotateMaterix.m[1][0], rotateMaterix.m[1][1], rotateMaterix.m[1][2], rotateMaterix.m[1][3],
+			rotateMaterix.m[2][0], rotateMaterix.m[2][1], rotateMaterix.m[2][2], rotateMaterix.m[2][3],
+			rotateMaterix.m[3][0], rotateMaterix.m[3][1], rotateMaterix.m[3][2], rotateMaterix.m[3][3]
+			);
 
 
 		ImGui::End();
@@ -292,7 +291,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 
-		Matrix4x4 worldMatS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
+		/*Matrix4x4 worldMatS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
 		Matrix4x4 worldMatE = MakeAffineMatrix(scales[1], rotates[1], translates[1]);
 		worldMatE = Multiply(worldMatE, worldMatS);
 		Matrix4x4 worldMatH = MakeAffineMatrix(scales[2], rotates[2], translates[2]);
@@ -300,7 +299,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		sphereS.ceneter = { worldMatS.m[3][0],worldMatS.m[3][1],worldMatS.m[3][2] };
 		sphereE.ceneter = { worldMatE.m[3][0],worldMatE.m[3][1],worldMatE.m[3][2] };
-		sphereH.ceneter = { worldMatH.m[3][0],worldMatH.m[3][1],worldMatH.m[3][2] };
+		sphereH.ceneter = { worldMatH.m[3][0],worldMatH.m[3][1],worldMatH.m[3][2] };*/
 
 
 		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
@@ -318,11 +317,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		MyVec3 originPoint = Transform(Transform(sphereS.ceneter, viewProject), viewportMat);
+		/*MyVec3 originPoint = Transform(Transform(sphereS.ceneter, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((sphereE.ceneter), viewProject), viewportMat);
 
 		MyVec3 originPoint2 = Transform(Transform(sphereE.ceneter, viewProject), viewportMat);
-		MyVec3 diffPoint2 = Transform(Transform((sphereH.ceneter), viewProject), viewportMat);
+		MyVec3 diffPoint2 = Transform(Transform((sphereH.ceneter), viewProject), viewportMat);*/
 
 		/*if (IsCollision(obb, obb2))
 		{
@@ -372,14 +371,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}*/
 
 
-		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+		/*Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 				int(diffPoint.x), int(diffPoint.y), BLACK);
 		Novice::DrawLine(int(originPoint2.x), int(originPoint2.y),
 			int(diffPoint2.x), int(diffPoint2.y), BLACK);
 
 		DrawSphere(sphereS, viewProject, viewportMat, RED);
 		DrawSphere(sphereE, viewProject, viewportMat, GREEN);
-		DrawSphere(sphereH, viewProject, viewportMat, BLUE);
+		DrawSphere(sphereH, viewProject, viewportMat, BLUE);*/
 
 		///
 		/// ↑描画処理ここまで
