@@ -39,118 +39,40 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ライブラリの初期化
 	Novice::Initialize(kWindowTitle, 1280, 720);
 
-	MyVec3 rotate{ 0.0f,0.0f,0.0f };
-	MyVec3 translate{ 0.0f,0.0f,0.0f };
 
+	/*MyVec3 rotate{ 0.0f,0.0f,0.0f };
+	MyVec3 translate{ 0.0f,0.0f,0.0f };*/
+
+
+	//カメラ
 	MyVec3 cameraPosition{ 0.0f,0.0f,-10.49f };
 	MyVec3 camerarota{ 0.5f,0.0f,0.0f };
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
-	/*bool isCatmullRom = false;*/
-
-	/*Plane plane{};
-	plane.normal = { 1.0f,1.0f,0.0f };
-	plane.distance = 1.0f;*/
-
-	/*uint32_t color = 0xffffffff;*/
-
-	/*Segument segument{};
-	segument.origin = { -0.56f,0.0f,0.0f };
-	segument.diff = { 1.0f,0.5f,0.2f };
-	float lenght = 1.0f;*/
-
-	/*Triangle triangle = { MyVec3{-1.0f,0.0f,0.0f},MyVec3{0.0f,1.0f,0.0f},MyVec3{1.0f,0.0f,0.0f} };*/
-
-	/*Sphere sphere{ {0.5f,0.5f,0.5f},0.4f };*/
-
-	/*AABB aabb1{
-		.min{-0.5f,-0.5f,-0.5f},
-		.max{0.0f,0.0f,0.0f},
-	};*/
-
-	/*AABB aabb2{
-		.min{-0.2f,-0.2f,-0.2f},
-		.max{1.0f,1.0f,1.0f},
-	};*/
-
-	/*MyVec3 obbrotation{ 0.0f,0.0f,0.0f };
-	OBB obb{
-		.center{-1.0f,0.0f,0.0f},
-		.orientations = {{1.0f,0.0f,0.0f},
-						{0.0f,1.0f,0.0f},
-						{0.0f,0.0f,1.0f}},
-		.size{0.5f,0.5f,0.5f}
-	};*/
-	/*MyVec3 obb2rotation{ 0.0f,0.0f,0.0f };
-	OBB obb2{
-		.center{-0.17f,0.0f,0.0f},
-		.orientations = {{1.0f,0.0f,0.0f},
-						{0.0f,1.0f,0.0f},
-						{0.0f,0.0f,1.0f}},
-		.size{0.5f,0.5f,0.5f}
-	};*/
-
-	/*std::vector<MyVec3> controlPoints =
-	{
-		{-0.8f,0.58f,1.0f},
-		{1.76f,1.0f,-0.3f},
-		{0.94f,-0.7f,2.3f},
-	};
-
-	Sphere sphere1{ controlPoints[0],0.01f};
-	Sphere sphere2{ controlPoints[1],0.01f};
-	Sphere sphere3{ controlPoints[2],0.01f};
+	
+	float deltaTime = 1.0f / 60.0f;
 
 
-	std::vector<MyVec3> controlPointsCatmull =
-	{
-		{-0.8f,0.58f,1.0f},
-		{1.76f,1.0f,-0.3f},
-		{0.94f,-0.7f,2.3f},
-		{-0.53f,-0.26f,-0.15f},
-	};
-
-	Sphere sphereCat1{ controlPointsCatmull[0],0.01f };
-	Sphere sphereCat2{ controlPointsCatmull[1],0.01f };
-	Sphere sphereCat3{ controlPointsCatmull[2],0.01f };
-	Sphere sphereCat4{ controlPointsCatmull[3],0.01f };*/
+	//バネ
+	Spring spring{};
+	spring.anchor = { 0.0f,0.0f,0.0f };
+	spring.naturalLength = 1.0f;
+	spring.stiffness = 100.0f;
+	spring.dempingCoefficient = 2.0f;
 
 
-	/*MyVec3 translates[3] = {
-		{0.2f,1.0f,0.0f},
-		{0.4f,0.0f,0.0f},
-		{0.3f,0.0f,0.0f}
-	};
-
-	MyVec3 rotates[3] = {
-		{0.0f,1.0f,-6.8f},
-		{0.0f,0.0f,-1.4f},
-		{0.0f,0.0f,0.0f}
-	};
-
-	MyVec3 scales[3] = {
-		{1.0f,1.0f,1.0f},
-		{1.0f,1.0f,1.0f},
-		{1.0f,1.0f,1.0f}
-	};
-
-	Sphere sphereS = { translates[0],0.05f };
-	Sphere sphereE = { translates[1],0.05f };
-	Sphere sphereH = { translates[2],0.05f };*/
+	//ボール
+	Ball ball{};
+	ball.position = { 1.2f,0.0f,0.0f };
+	ball.mass = 2.0f;
+	ball.radius = 0.05f;
+	ball.color = BLUE;
+	Sphere ballDraw{};
+	ballDraw.ceneter = ball.position;
+	ballDraw.radius = ball.radius;
 
 
-	MyVec3 a{ 0.2f,1.0f,0.0f };
-	MyVec3 b{ 2.4f,3.1f,1.2f };
-	MyVec3 c = a + b;
-	MyVec3 d = a - b;
-	MyVec3 e = a * 2.4f;
-	MyVec3 rotateparameta{ 0.4f,1.43f,-0.8f };
-	Matrix4x4 rotateXMaterix = MakeRotateXMatrix(rotateparameta.x);
-	Matrix4x4 rotateYMaterix = MakeRotateYMatrix(rotateparameta.y);
-	Matrix4x4 rotateZMaterix = MakeRotateZMatrix(rotateparameta.z);
-	Matrix4x4 rotateMaterix = rotateXMaterix * rotateYMaterix * rotateZMaterix;
-
-
+	bool isStart = false;
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -168,106 +90,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-
 #ifdef _DEBUG
 
 		ImGui::Begin("Sphere,Camera");
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
-		//ImGui::DragFloat3("segument origin", &segument.origin.x, 0.01f);
-		//ImGui::DragFloat3("segument diff", &segument.diff.x, 0.01f);
-		//lenght = MyVec3(segument.diff).Lenght();
-		//ImGui::DragFloat("length", &lenght, 0.01f, 0.0f);
-
-		/*ImGui::DragFloat3("obb object rotate", &obbrotation.x, 0.01f, -20.0f, 20.0f);
-		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(obbrotation.x), Multiply(MakeRotateYMatrix(obbrotation.y), MakeRotateZMatrix(obbrotation.z)));
-		
-		obb.orientations[0].x = rotateMatrix.m[0][0];
-		obb.orientations[0].y = rotateMatrix.m[0][1];
-		obb.orientations[0].z = rotateMatrix.m[0][2];
-
-		obb.orientations[1].x = rotateMatrix.m[1][0];
-		obb.orientations[1].y = rotateMatrix.m[1][1];
-		obb.orientations[1].z = rotateMatrix.m[1][2];
-
-		obb.orientations[2].x = rotateMatrix.m[2][0];
-		obb.orientations[2].y = rotateMatrix.m[2][1];
-		obb.orientations[2].z = rotateMatrix.m[2][2];
-
-		obb.orientations[0] = obb.orientations[0].Normalize();
-		obb.orientations[1] = obb.orientations[1].Normalize();
-		obb.orientations[2] = obb.orientations[2].Normalize();
-
-		ImGui::DragFloat3("obb center", &obb.center.x, 0.01f, -5.0f, 5.0f);
-		ImGui::DragFloat3("obb size", &obb.size.x, 0.01f, 0.0f, 2.0f);*/
-
-		/*ImGui::DragFloat3("obb2 object rotate", &obb2rotation.x, 0.01f, -20.0f, 20.0f);
-		Matrix4x4 rotateMatrix2 = Multiply(MakeRotateXMatrix(obb2rotation.x), Multiply(MakeRotateYMatrix(obb2rotation.y), MakeRotateZMatrix(obb2rotation.z)));
-
-		obb2.orientations[0].x = rotateMatrix2.m[0][0];
-		obb2.orientations[0].y = rotateMatrix2.m[0][1];
-		obb2.orientations[0].z = rotateMatrix2.m[0][2];
-
-		obb2.orientations[1].x = rotateMatrix2.m[1][0];
-		obb2.orientations[1].y = rotateMatrix2.m[1][1];
-		obb2.orientations[1].z = rotateMatrix2.m[1][2];
-
-		obb2.orientations[2].x = rotateMatrix2.m[2][0];
-		obb2.orientations[2].y = rotateMatrix2.m[2][1];
-		obb2.orientations[2].z = rotateMatrix2.m[2][2];
-
-		obb2.orientations[0] = obb2.orientations[0].Normalize();
-		obb2.orientations[1] = obb2.orientations[1].Normalize();
-		obb2.orientations[2] = obb2.orientations[2].Normalize();
-
-		ImGui::DragFloat3("obb2 center", &obb2.center.x, 0.01f, -5.0f, 5.0f);
-		ImGui::DragFloat3("obb2 size", &obb2.size.x, 0.01f, 0.0f, 2.0f);*/
-		
-		/*ImGui::Checkbox("isDrawCatmull", &isCatmullRom);
-		if (!isCatmullRom)
+		if (ImGui::Button("Start"))
 		{
-			ImGui::DragFloat3("control1", &controlPoints[0].x, 0.01f);
-			sphere1.ceneter = controlPoints[0];
-			ImGui::DragFloat3("control2", &controlPoints[1].x, 0.01f);
-			sphere2.ceneter = controlPoints[1];
-			ImGui::DragFloat3("control3", &controlPoints[2].x, 0.01f);
-			sphere3.ceneter = controlPoints[2];
+			isStart = true;
 		}
-		else
-		{
-			ImGui::DragFloat3("point1", &controlPointsCatmull[0].x, 0.01f);
-			sphereCat1.ceneter = controlPointsCatmull[0];
-			ImGui::DragFloat3("point2", &controlPointsCatmull[1].x, 0.01f);
-			sphereCat2.ceneter = controlPointsCatmull[1];
-			ImGui::DragFloat3("point3", &controlPointsCatmull[2].x, 0.01f);
-			sphereCat3.ceneter = controlPointsCatmull[2];
-			ImGui::DragFloat3("point4", &controlPointsCatmull[3].x, 0.01f);
-			sphereCat4.ceneter = controlPointsCatmull[3];
-		}*/
-		/*ImGui::DragFloat3("S_trans", &translates[0].x, 0.01f);
-		ImGui::DragFloat3("S_rotate", &rotates[0].x, 0.01f);
-		ImGui::DragFloat3("S_scale", &scales[0].x, 0.01f);
-
-		ImGui::DragFloat3("E_trans", &translates[1].x, 0.01f);
-		ImGui::DragFloat3("E_rotate", &rotates[1].x, 0.01f);
-		ImGui::DragFloat3("E_scale", &scales[1].x, 0.01f);
-		
-		ImGui::DragFloat3("H_trans", &translates[2].x, 0.01f);
-		ImGui::DragFloat3("H_rotate", &rotates[2].x, 0.01f);
-		ImGui::DragFloat3("H_scale", &scales[2].x, 0.01f);*/
-
-		ImGui::Text("c:%f,%f,%f", c.x, c.y, c.z);
-		ImGui::Text("d:%f,%f,%f", d.x, d.y, d.z);
-		ImGui::Text("e:%f,%f,%f", e.x, e.y, e.z);
-		ImGui::Text(
-			"matrix:\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
-			rotateMaterix.m[0][0], rotateMaterix.m[0][1], rotateMaterix.m[0][2], rotateMaterix.m[0][3],
-			rotateMaterix.m[1][0], rotateMaterix.m[1][1], rotateMaterix.m[1][2], rotateMaterix.m[1][3],
-			rotateMaterix.m[2][0], rotateMaterix.m[2][1], rotateMaterix.m[2][2], rotateMaterix.m[2][3],
-			rotateMaterix.m[3][0], rotateMaterix.m[3][1], rotateMaterix.m[3][2], rotateMaterix.m[3][3]
-			);
-
 
 		ImGui::End();
 
@@ -291,47 +123,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 
-		/*Matrix4x4 worldMatS = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
-		Matrix4x4 worldMatE = MakeAffineMatrix(scales[1], rotates[1], translates[1]);
-		worldMatE = Multiply(worldMatE, worldMatS);
-		Matrix4x4 worldMatH = MakeAffineMatrix(scales[2], rotates[2], translates[2]);
-		worldMatH = Multiply(worldMatH, worldMatE);
+		//バネ
+		if (isStart)
+		{
+			MyVec3 diff = ball.position - spring.anchor;
+			float length = diff.Lenght();
+			if (length != 0.0f)
+			{
+				MyVec3 direction = diff.Normalize();
+				MyVec3 restPos = spring.anchor + direction * spring.naturalLength;
+				MyVec3 displacement = (ball.position - restPos) * length;
+				MyVec3 restoringForce = displacement * -spring.stiffness;
+				MyVec3 dempingForce = ball.velocity * -spring.dempingCoefficient;
+				MyVec3 force = restoringForce + dempingForce;
+				ball.aceleration = force / ball.mass;
+			}
+			ball.velocity += ball.aceleration * deltaTime;
+			ball.position += ball.velocity * deltaTime;
+			ballDraw.ceneter = ball.position;
+		}
 
-		sphereS.ceneter = { worldMatS.m[3][0],worldMatS.m[3][1],worldMatS.m[3][2] };
-		sphereE.ceneter = { worldMatE.m[3][0],worldMatE.m[3][1],worldMatE.m[3][2] };
-		sphereH.ceneter = { worldMatH.m[3][0],worldMatH.m[3][1],worldMatH.m[3][2] };*/
 
-
-		Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);
+		/*Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);*/
 		Matrix4x4 cameraMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
 		cameraMat = Multiply(cameraMat, MakeRotateXMatrix(camerarota.x));
 		cameraMat = Multiply(cameraMat, MakeRotateYMatrix(camerarota.y));
 		Matrix4x4 viewMat = Inverse(cameraMat);
 		Matrix4x4 projectionMat = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.f);
 		Matrix4x4 viewProject= Multiply(viewMat, projectionMat);
-		//Matrix4x4 worldViewProjectionMat = Multiply(viewMat, projectionMat);
-		//worldViewProjectionMat = Multiply(worldMat, worldViewProjectionMat);
+		Matrix4x4 viewportMat = MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
+		/*Matrix4x4 worldViewProjectionMat = Multiply(viewMat, projectionMat);
+		worldViewProjectionMat = Multiply(worldMat, worldViewProjectionMat);
 
-		Matrix4x4 viewportMat= MakeViewportMatrix(0, 0, float(1280), float(720), 0.0f, 1.0f);
-
-		/*MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
+		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		/*MyVec3 originPoint = Transform(Transform(sphereS.ceneter, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform((sphereE.ceneter), viewProject), viewportMat);
-
-		MyVec3 originPoint2 = Transform(Transform(sphereE.ceneter, viewProject), viewportMat);
-		MyVec3 diffPoint2 = Transform(Transform((sphereH.ceneter), viewProject), viewportMat);*/
-
-		/*if (IsCollision(obb, obb2))
-		{
-			color = RED;
-		}
-		else
-		{
-			color = WHITE;
-		}*/
-		
+		MyVec3 originPoint = Transform(Transform(spring.anchor, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform(ball.position, viewProject), viewportMat);
 
 
 		///
@@ -348,37 +176,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
-		//DrawOBB(obb, viewProject, viewportMat, color);
-		//DrawOBB(obb2, viewProject, viewportMat, WHITE);
-
-		/*DrawSphere(sphere, viewProject, viewportMat, WHITE);*/
-		//DrawAABB(aabb2, viewProject, viewportMat, WHITE);
-		//DrawTriangle(triangle, viewProject, viewportMat, WHITE);
-		/*if (!isCatmullRom)
-		{
-			DrawBezier(controlPoints, viewProject, viewportMat, color);
-			DrawSphere(sphere1, viewProject, viewportMat, BLACK);
-			DrawSphere(sphere2, viewProject, viewportMat, BLACK);
-			DrawSphere(sphere3, viewProject, viewportMat, BLACK);
-		}
-		else
-		{
-			DrawCatmullRom(controlPointsCatmull, viewProject, viewportMat, color);
-			DrawSphere(sphereCat1, viewProject, viewportMat, BLACK);
-			DrawSphere(sphereCat2, viewProject, viewportMat, BLACK);
-			DrawSphere(sphereCat3, viewProject, viewportMat, BLACK);
-			DrawSphere(sphereCat4, viewProject, viewportMat, BLACK);
-		}*/
-
-
-		/*Novice::DrawLine(int(originPoint.x), int(originPoint.y),
-				int(diffPoint.x), int(diffPoint.y), BLACK);
-		Novice::DrawLine(int(originPoint2.x), int(originPoint2.y),
-			int(diffPoint2.x), int(diffPoint2.y), BLACK);
-
-		DrawSphere(sphereS, viewProject, viewportMat, RED);
-		DrawSphere(sphereE, viewProject, viewportMat, GREEN);
-		DrawSphere(sphereH, viewProject, viewportMat, BLUE);*/
+		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+			int(diffPoint.x), int(diffPoint.y), WHITE);
+		DrawSphere(ballDraw, viewProject, viewportMat, ball.color);
 
 		///
 		/// ↑描画処理ここまで

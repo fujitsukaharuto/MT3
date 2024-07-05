@@ -50,6 +50,24 @@ struct OBB
 	MyVec3 size;
 };
 
+struct Spring
+{
+	MyVec3 anchor;//固定された端
+	float naturalLength;//自然長
+	float stiffness;//剛性、バネ定数ｋ
+	float dempingCoefficient;//減衰
+};
+
+struct Ball
+{
+	MyVec3 position;
+	MyVec3 velocity;
+	MyVec3 aceleration;
+	float mass;
+	float radius;
+	unsigned int color;
+};
+
 float Clampf(float x, float min, float max);
 
 /// <summary>

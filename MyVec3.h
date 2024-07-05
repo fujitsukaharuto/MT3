@@ -26,6 +26,8 @@ public:
 
 	bool operator==(const MyVec3& v) const { return (x == v.x && y == v.y && z == v.z); }
 
+	MyVec3 operator+=(const MyVec3& v) { x += v.x; y += v.y; z += v.z; return *this; }
+
 	MyVec3 operator+()const { return *this; }
 	MyVec3 operator-()const { return MyVec3(-x, -y, -z); }
 
