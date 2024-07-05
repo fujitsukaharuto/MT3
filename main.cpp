@@ -50,28 +50,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	MyVec3 cameraDir{ 0.0f,0.0f,1.0f };
 
 	
+	MyVec3 originCenetr{ 0.0f,0.0f,0.0f };
 	const MyVec3 kGravity{ 0.0f,-9.8f,0.0f };
 	float deltaTime = 1.0f / 60.0f;
 
 
 	//バネ
-	Spring spring{};
+	/*Spring spring{};
 	spring.anchor = { 0.0f,1.0f,0.0f };
 	spring.naturalLength = 0.7f;
 	spring.stiffness = 100.0f;
-	spring.dempingCoefficient = 2.0f;
+	spring.dempingCoefficient = 2.0f;*/
 
 
 	//ボール
-	Ball ball{};
+	/*Ball ball{};
 	ball.position = { 0.8f,0.2f,0.0f };
 	ball.mass = 2.0f;
 	ball.radius = 0.05f;
 	ball.color = BLUE;
 	Sphere ballDraw{};
 	ballDraw.ceneter = ball.position;
-	ballDraw.radius = ball.radius;
+	ballDraw.radius = ball.radius;*/
 
+
+	//円運動
+	float angularVelocity = 3.14f;
+	float angle = 0.0f;
+	float r = 0.8f;
+	Sphere p{};
+	p.ceneter = { r,0.0f,0.0f };
+	p.radius = 0.08f;
+	float timer = 0;
 
 	bool isStart = false;
 
@@ -101,6 +111,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			isStart = true;
 		}
+		ImGui::Text("time:%f", timer);
 
 		ImGui::End();
 
@@ -127,7 +138,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//バネ
 		if (isStart)
 		{
-			MyVec3 diff = ball.position - spring.anchor;
+			/*MyVec3 diff = ball.position - spring.anchor;
 			float length = diff.Lenght();
 			if (length != 0.0f)
 			{
@@ -141,7 +152,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			ball.velocity += ball.aceleration * deltaTime;
 			ball.position += ball.velocity * deltaTime;
-			ballDraw.ceneter = ball.position;
+			ballDraw.ceneter = ball.position;*/
+
+
+			p.ceneter.x = originCenetr.x + std::cos(angle) * r;
+			p.ceneter.y = originCenetr.y + std::sin(angle) * r;
+			p.ceneter.z = originCenetr.z;
+			angle+=angularVelocity*deltaTime;
+			timer += 1.0f * deltaTime;
 		}
 
 
@@ -159,8 +177,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		MyVec3 originPoint = Transform(Transform(spring.anchor, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform(ball.position, viewProject), viewportMat);
+		/*MyVec3 originPoint = Transform(Transform(spring.anchor, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform(ball.position, viewProject), viewportMat);*/
 
 
 		///
@@ -177,9 +195,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
-		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
-			int(diffPoint.x), int(diffPoint.y), WHITE);
-		DrawSphere(ballDraw, viewProject, viewportMat, ball.color);
+		DrawSphere(p, viewProject, viewportMat, BLUE);
 
 		///
 		/// ↑描画処理ここまで
