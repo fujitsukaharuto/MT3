@@ -68,6 +68,15 @@ struct Ball
 	unsigned int color;
 };
 
+struct Pendulum
+{
+	MyVec3 anchor;
+	float length;
+	float angle;
+	float angularVelocity;
+	float angularAcceleration;
+};
+
 float Clampf(float x, float min, float max);
 
 /// <summary>

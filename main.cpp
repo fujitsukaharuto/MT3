@@ -64,25 +64,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//ボール
-	/*Ball ball{};
-	ball.position = { 0.8f,0.2f,0.0f };
+	Ball ball{};
+	ball.position = { 0.0f,0.0f,0.0f };
 	ball.mass = 2.0f;
 	ball.radius = 0.05f;
 	ball.color = BLUE;
-	Sphere ballDraw{};
+	/*Sphere ballDraw{};
 	ballDraw.ceneter = ball.position;
 	ballDraw.radius = ball.radius;*/
 
 
 	//円運動
-	float angularVelocity = 3.14f;
+	/*float angularVelocity = 3.14f;
 	float angle = 0.0f;
 	float r = 0.8f;
 	Sphere p{};
 	p.ceneter = { r,0.0f,0.0f };
-	p.radius = 0.08f;
-	float timer = 0;
+	p.radius = 0.08f;*/
 
+
+	//振り子
+	Pendulum pendulum{};
+	pendulum.anchor = { 0.0f,1.0f,0.0f };
+	pendulum.length = 0.8f;
+	pendulum.angle = 0.7f;
+	pendulum.angularVelocity = 0.0f;
+	pendulum.angularAcceleration = 0.0f;
+	Sphere p{};
+	p.ceneter = { 0.0f,0.0f,0.0f };
+	p.radius = 0.08f;
+
+
+	float timer = 0;
 	bool isStart = false;
 
 	// キー入力結果を受け取る箱
@@ -155,10 +168,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ballDraw.ceneter = ball.position;*/
 
 
-			p.ceneter.x = originCenetr.x + std::cos(angle) * r;
+			/*p.ceneter.x = originCenetr.x + std::cos(angle) * r;
 			p.ceneter.y = originCenetr.y + std::sin(angle) * r;
 			p.ceneter.z = originCenetr.z;
-			angle+=angularVelocity*deltaTime;
+			angle+=angularVelocity*deltaTime;*/
+
+
+			pendulum.angularAcceleration =
+				-(9.8f / pendulum.length) * std::sin(pendulum.angle);
+			pendulum.angularVelocity += pendulum.angularAcceleration * deltaTime;
+			pendulum.angle += pendulum.angularVelocity * deltaTime;
+
+			ball.position.x = pendulum.anchor.x + std::sin(pendulum.angle) * pendulum.length;
+			ball.position.y = pendulum.anchor.y - std::cos(pendulum.angle) * pendulum.length;
+			ball.position.z = pendulum.anchor.z;
+			p.ceneter = ball.position;
+
+
 			timer += 1.0f * deltaTime;
 		}
 
@@ -177,8 +203,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		/*MyVec3 originPoint = Transform(Transform(spring.anchor, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform(ball.position, viewProject), viewportMat);*/
+		MyVec3 originPoint = Transform(Transform(pendulum.anchor, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform(p.ceneter, viewProject), viewportMat);
 
 
 		///
@@ -195,7 +221,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
-		DrawSphere(p, viewProject, viewportMat, BLUE);
+		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+			int(diffPoint.x), int(diffPoint.y), WHITE);
+		DrawSphere(p, viewProject, viewportMat, ball.color);
 
 		///
 		/// ↑描画処理ここまで
