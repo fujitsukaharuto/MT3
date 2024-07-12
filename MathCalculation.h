@@ -77,6 +77,15 @@ struct Pendulum
 	float angularAcceleration;
 };
 
+struct ConicalPendulum
+{
+	MyVec3 anchor;
+	float length;
+	float halfApexAngle;
+	float angle;
+	float angularVelocity;
+};
+
 float Clampf(float x, float min, float max);
 
 /// <summary>

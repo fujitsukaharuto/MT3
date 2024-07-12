@@ -84,7 +84,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//振り子
-	Pendulum pendulum{};
+	/*Pendulum pendulum{};
 	pendulum.anchor = { 0.0f,1.0f,0.0f };
 	pendulum.length = 0.8f;
 	pendulum.angle = 0.7f;
@@ -92,7 +92,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pendulum.angularAcceleration = 0.0f;
 	Sphere p{};
 	p.ceneter = { 0.0f,0.0f,0.0f };
+	p.radius = 0.08f;*/
+
+
+	//円錐振り子
+	ConicalPendulum conicalPendulum;
+	conicalPendulum.anchor = { 0.0f,1.0f,0.0f };
+	conicalPendulum.length = 0.8f;
+	conicalPendulum.halfApexAngle = 0.7f;
+	conicalPendulum.angle = 0.0f;
+	conicalPendulum.angularVelocity = 0.0f;
+	Sphere p{};
+	p.ceneter = { 0.0f,0.2f,0.0f };
 	p.radius = 0.08f;
+	conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
+	conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
+	float conicalRad = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+	float conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+	p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
+	p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
+	p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;
 
 
 	float timer = 0;
@@ -119,6 +138,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Sphere,Camera");
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
+
+		if (isStart)
+		{
+			ImGui::DragFloat("length", &conicalPendulum.length, 0.01f, 0.01f, 10.0f);
+			ImGui::DragFloat("halfApexAngle", &conicalPendulum.halfApexAngle, 0.01f, 0.05f, 1.5f);
+		}
 
 		if (ImGui::Button("Start"))
 		{
@@ -174,7 +199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			angle+=angularVelocity*deltaTime;*/
 
 
-			pendulum.angularAcceleration =
+			/*pendulum.angularAcceleration =
 				-(9.8f / pendulum.length) * std::sin(pendulum.angle);
 			pendulum.angularVelocity += pendulum.angularAcceleration * deltaTime;
 			pendulum.angle += pendulum.angularVelocity * deltaTime;
@@ -182,7 +207,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ball.position.x = pendulum.anchor.x + std::sin(pendulum.angle) * pendulum.length;
 			ball.position.y = pendulum.anchor.y - std::cos(pendulum.angle) * pendulum.length;
 			ball.position.z = pendulum.anchor.z;
-			p.ceneter = ball.position;
+			p.ceneter = ball.position;*/
+
+
+			conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
+			conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
+			conicalRad = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+			conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+			p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
+			p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
+			p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;
 
 
 			timer += 1.0f * deltaTime;
@@ -203,7 +237,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		MyVec3 originPoint = Transform(Transform(pendulum.anchor, viewProject), viewportMat);
+		MyVec3 originPoint = Transform(Transform(conicalPendulum.anchor, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform(p.ceneter, viewProject), viewportMat);
 
 
