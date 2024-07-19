@@ -86,6 +86,13 @@ struct ConicalPendulum
 	float angularVelocity;
 };
 
+struct Capsule
+{
+	Segument segument;
+	float radius;
+};
+
+
 float Clampf(float x, float min, float max);
 
 /// <summary>
@@ -135,3 +142,5 @@ float Clamp(float x, float min, float max);
 MyVec3 CatmullRomPoint(const MyVec3& p0, const MyVec3& p1, const MyVec3& p2, const MyVec3& p3, float t);
 
 MyVec3 CatmullRom(const std::vector<MyVec3>& control, float t);
+
+MyVec3 Reflect(const MyVec3& v, const MyVec3& normal);

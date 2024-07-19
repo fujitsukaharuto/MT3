@@ -185,3 +185,10 @@ MyVec3 CatmullRom(const std::vector<MyVec3>& control, float t)
 	const MyVec3& p3 = control[index3];
 	return CatmullRomPoint(p0, p1, p2, p3, t_2);
 }
+
+MyVec3 Reflect(const MyVec3& v, const MyVec3& normal)
+{
+	MyVec3 reflect = v - (normal * 2 * (v * normal));
+
+	return reflect;
+}

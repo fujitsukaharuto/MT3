@@ -65,13 +65,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ボール
 	Ball ball{};
-	ball.position = { 0.0f,0.0f,0.0f };
+	ball.position = { 0.8f,1.2f,0.3f };
 	ball.mass = 2.0f;
+	ball.aceleration = { 0.0f,-9.8f,0.0f };
 	ball.radius = 0.05f;
-	ball.color = BLUE;
+	ball.color = WHITE;
 	/*Sphere ballDraw{};
 	ballDraw.ceneter = ball.position;
 	ballDraw.radius = ball.radius;*/
+
+
+	// 平面
+	Plane plane;
+	plane.normal = MyVec3(-0.2f, 0.9f, -0.3f).Normalize();
+	plane.distance = 0.0f;
 
 
 	//円運動
@@ -96,7 +103,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//円錐振り子
-	ConicalPendulum conicalPendulum;
+	/*ConicalPendulum conicalPendulum;
 	conicalPendulum.anchor = { 0.0f,1.0f,0.0f };
 	conicalPendulum.length = 0.8f;
 	conicalPendulum.halfApexAngle = 0.7f;
@@ -111,11 +118,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
 	p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
 	p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
-	p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;
+	p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;*/
 
 
 	float timer = 0;
 	bool isStart = false;
+	bool isReset = false;
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -141,13 +149,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		if (isStart)
 		{
-			ImGui::DragFloat("length", &conicalPendulum.length, 0.01f, 0.01f, 10.0f);
-			ImGui::DragFloat("halfApexAngle", &conicalPendulum.halfApexAngle, 0.01f, 0.05f, 1.5f);
+			/*ImGui::DragFloat("length", &conicalPendulum.length, 0.01f, 0.01f, 10.0f);
+			ImGui::DragFloat("halfApexAngle", &conicalPendulum.halfApexAngle, 0.01f, 0.05f, 1.5f);*/
 		}
 
 		if (ImGui::Button("Start"))
 		{
 			isStart = true;
+		}
+		if (ImGui::Button("Reset"))
+		{
+			isReset = true;
+			isStart = false;
+			ball.position = { 0.8f,1.2f,0.3f };
+			ball.aceleration = { 0.0f,-9.8f,0.0f };
+			ball.velocity = { 0.0f, 0.0f, 0.0f };
+			timer = 0.0f;
 		}
 		ImGui::Text("time:%f", timer);
 
@@ -210,14 +227,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			p.ceneter = ball.position;*/
 
 
-			conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
+			/*conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
 			conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
 			conicalRad = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
 			conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
 			p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
 			p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
-			p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;
+			p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;*/
 
+
+			ball.velocity += ball.aceleration * deltaTime;
+			ball.position += ball.velocity * deltaTime;
+			if (IsCollision(Sphere{ ball.position,ball.radius }, plane))
+			{
+				MyVec3 reflected = Reflect(ball.velocity, plane.normal);
+				MyVec3 projectToNormal = Project(reflected, plane.normal);
+				MyVec3 movingDirection = reflected - projectToNormal;
+				const float e = 0.6f;
+				ball.velocity = projectToNormal * e + movingDirection;
+
+				//Capsule capsule;
+				//capsule.radius = ball.radius;
+				//capsule.segument.origin = ball.position;
+				//capsule.segument.diff = plane.normal * 4.0f;
+
+				//float dot = capsule.segument.diff * plane.normal;
+				//float t = plane.distance - capsule.segument.origin * plane.normal;
+				//if (dot != 0.0f)
+				//{
+					//t = t / dot;
+					//if (-0.5f <= t && t <= 1.0f)
+					//{
+						//MyVec3 aPoint = capsule.segument.diff * t;
+						//MyVec3 addLength = (plane.normal) * capsule.radius;
+						//aPoint += addLength;
+						//ball.position += aPoint;
+					//}
+				//}
+
+			}
 
 			timer += 1.0f * deltaTime;
 		}
@@ -237,8 +285,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		MyVec3 originPoint = Transform(Transform(segument.origin, viewProject), viewportMat);
 		MyVec3 diffPoint = Transform(Transform((segument.origin+segument.diff), viewProject), viewportMat);*/
 
-		MyVec3 originPoint = Transform(Transform(conicalPendulum.anchor, viewProject), viewportMat);
-		MyVec3 diffPoint = Transform(Transform(p.ceneter, viewProject), viewportMat);
+		/*MyVec3 originPoint = Transform(Transform(conicalPendulum.anchor, viewProject), viewportMat);
+		MyVec3 diffPoint = Transform(Transform(p.ceneter, viewProject), viewportMat);*/
 
 
 		///
@@ -255,9 +303,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 		//	int(diffPoint.x), int(diffPoint.y), WHITE);
 
-		Novice::DrawLine(int(originPoint.x), int(originPoint.y),
+		/*Novice::DrawLine(int(originPoint.x), int(originPoint.y),
 			int(diffPoint.x), int(diffPoint.y), WHITE);
-		DrawSphere(p, viewProject, viewportMat, ball.color);
+		DrawSphere(p, viewProject, viewportMat, ball.color);*/
+
+		DrawPlane(plane, viewProject, viewportMat, WHITE);
+
+		DrawSphere(Sphere{ ball.position,ball.radius }, viewProject, viewportMat, WHITE);
+
 
 		///
 		/// ↑描画処理ここまで
