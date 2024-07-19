@@ -235,9 +235,50 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
 			p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;*/
 
+			/*Capsule capsule;
+			capsule.radius = ball.radius;
+			capsule.segument.origin = ball.position;
 
 			ball.velocity += ball.aceleration * deltaTime;
 			ball.position += ball.velocity * deltaTime;
+
+			capsule.segument.diff = ball.position - capsule.segument.origin;*/
+
+			//if (true/*capsule.segument.origin.y >= capsule.segument.origin.y + capsule.segument.diff.y*/)
+			//{
+			//	Plane newPlane;
+			//	newPlane.normal = plane.normal;
+			//	newPlane.distance = plane.distance + ball.radius;
+
+			//	if (IsCollision(capsule.segument, newPlane))
+			//	{
+			//		float dot = capsule.segument.diff * newPlane.normal;
+			//		float t = newPlane.distance - capsule.segument.origin * newPlane.normal;
+			//		t = t / dot;
+
+			//		MyVec3 aPoint = capsule.segument.origin + (capsule.segument.diff * t);
+			//		ball.position = aPoint;
+			//		MyVec3 reflected = Reflect(ball.velocity, newPlane.normal);
+			//		MyVec3 projectToNormal = Project(reflected, newPlane.normal);
+			//		MyVec3 movingDirection = reflected - projectToNormal;
+			//		const float e = 0.8f;
+			//		ball.velocity = projectToNormal * e + movingDirection;
+
+			//	}
+
+			//}
+
+			Capsule capsules;
+			capsules.radius = ball.radius;
+			capsules.segument.origin = ball.position;
+
+			ball.velocity += ball.aceleration * deltaTime;
+			ball.position += ball.velocity * deltaTime;
+
+			capsules.segument.diff = ball.position - capsules.segument.origin;
+
+			//ball.velocity += ball.aceleration * deltaTime;
+			//ball.position += ball.velocity * deltaTime;
 			if (IsCollision(Sphere{ ball.position,ball.radius }, plane))
 			{
 				MyVec3 reflected = Reflect(ball.velocity, plane.normal);
@@ -265,6 +306,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					}
 				}
 
+			}
+			else if (IsCollision(capsules.segument,plane))
+			{
+				Plane newPlane;
+				newPlane.normal = plane.normal;
+				newPlane.distance = plane.distance + ball.radius;
+
+				float dot = capsules.segument.diff * newPlane.normal;
+				float t = newPlane.distance - capsules.segument.origin * newPlane.normal;
+				t = t / dot;
+
+				MyVec3 aPoint = capsules.segument.origin + (capsules.segument.diff * t);
+				ball.position = aPoint;
+
+				MyVec3 reflected = Reflect(ball.velocity, plane.normal);
+				MyVec3 projectToNormal = Project(reflected, plane.normal);
+				MyVec3 movingDirection = reflected - projectToNormal;
+				const float e = 0.6f;
+				ball.velocity = projectToNormal * e + movingDirection;
 			}
 
 			timer += 1.0f * deltaTime;
