@@ -77,7 +77,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 平面
 	Plane plane;
-	plane.normal = MyVec3(-0.2f, 0.9f, -0.3f).Normalize();
+	plane.normal = MyVec3(-0.2f, 1.2f, -0.3f).Normalize();
 	plane.distance = 0.0f;
 
 
@@ -246,24 +246,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				const float e = 0.6f;
 				ball.velocity = projectToNormal * e + movingDirection;
 
-				//Capsule capsule;
-				//capsule.radius = ball.radius;
-				//capsule.segument.origin = ball.position;
-				//capsule.segument.diff = plane.normal * 4.0f;
+				Capsule capsule;
+				capsule.radius = ball.radius;
+				capsule.segument.origin = ball.position;
+				capsule.segument.diff = plane.normal * 4.0f;
 
-				//float dot = capsule.segument.diff * plane.normal;
-				//float t = plane.distance - capsule.segument.origin * plane.normal;
-				//if (dot != 0.0f)
-				//{
-					//t = t / dot;
-					//if (-0.5f <= t && t <= 1.0f)
-					//{
-						//MyVec3 aPoint = capsule.segument.diff * t;
-						//MyVec3 addLength = (plane.normal) * capsule.radius;
-						//aPoint += addLength;
-						//ball.position += aPoint;
-					//}
-				//}
+				float dot = capsule.segument.diff * plane.normal;
+				float t = plane.distance - capsule.segument.origin * plane.normal;
+				if (dot != 0.0f)
+				{
+					t = t / dot;
+					if (-0.5f <= t && t <= 1.0f)
+					{
+						MyVec3 aPoint = capsule.segument.diff * t;
+						MyVec3 addLength = (plane.normal) * capsule.radius;
+						aPoint += addLength;
+						ball.position += aPoint;
+					}
+				}
 
 			}
 
