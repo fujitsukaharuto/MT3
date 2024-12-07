@@ -446,3 +446,73 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 	return result;
 }
+
+Matrix4x4 MakeRotateAxisAngle(const MyVec3& axis, float angle) {
+
+	Matrix4x4 result{};
+
+	float length = std::sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
+	if (length == 0.0f) {
+		length = 1.0f;
+	}
+	float x = axis.x / length;
+	float y = axis.y / length;
+	float z = axis.z / length;
+
+	float c = std::cos(angle);
+	float s = std::sin(angle);
+	float t = 1.0f - c;
+
+	result.m[0][0] = c + x * x * t;
+	result.m[0][1] = x * y * t + z * s;
+	result.m[0][2] = x * z * t - y * s;
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = y * x * t - z * s;
+	result.m[1][1] = c + y * y * t;
+	result.m[1][2] = y * z * t + x * s;
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = z * x * t + y * s;
+	result.m[2][1] = z * y * t - x * s;
+	result.m[2][2] = c + z * z * t;
+	result.m[2][3] = 0.0f;
+
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+Matrix4x4 DirectionToDirection(const MyVec3& from, const MyVec3& to) {
+
+	Matrix4x4 result{};
+	
+	MyVec3 fromNorm = from.Normalize();
+	MyVec3 toNorm = to.Normalize();
+
+	
+	MyVec3 axis = fromNorm.cross(toNorm);
+	float dot = fromNorm * toNorm;
+	float angle = std::acos(dot);
+
+	if (axis.Lenght() < 1e-6f) {
+		if (dot > 0.9999f) {
+			
+			result.m[0][0] = result.m[1][1] = result.m[2][2] = result.m[3][3] = 1.0f;
+			return result;
+		}
+		else {
+			if (std::abs(fromNorm.x) > 0.99f) {
+				axis = { 0.0f, 1.0f, 0.0f };
+			}
+			else {
+				axis = { 0.0f, 0.0f, 1.0f };
+			}
+		}
+	}
+	
+	return MakeRotateAxisAngle(axis, angle);
+}

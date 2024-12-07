@@ -92,3 +92,12 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovy, float aspectRation, float nearCli
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+
+
+
+
+
+Matrix4x4 MakeRotateAxisAngle(const MyVec3& axis, float angle);
+
+Matrix4x4 DirectionToDirection(const MyVec3& from, const MyVec3& to);
+

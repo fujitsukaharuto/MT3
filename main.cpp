@@ -52,78 +52,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	MyVec3 originCenetr{ 0.0f,0.0f,0.0f };
 	const MyVec3 kGravity{ 0.0f,-9.8f,0.0f };
-	float deltaTime = 1.0f / 60.0f;
 
 
-	//バネ
-	/*Spring spring{};
-	spring.anchor = { 0.0f,1.0f,0.0f };
-	spring.naturalLength = 0.7f;
-	spring.stiffness = 100.0f;
-	spring.dempingCoefficient = 2.0f;*/
 
 
-	//ボール
-	Ball ball{};
-	ball.position = { 0.8f,1.2f,0.3f };
-	ball.mass = 2.0f;
-	ball.aceleration = { 0.0f,-9.8f,0.0f };
-	ball.radius = 0.05f;
-	ball.color = WHITE;
-	/*Sphere ballDraw{};
-	ballDraw.ceneter = ball.position;
-	ballDraw.radius = ball.radius;*/
+	MyVec3 axis = { 1.0f,1.0f,1.0f };
+	float angle = 0.44f;
+	Matrix4x4 rotateMatrix = MakeRotateAxisAngle(axis, angle);
 
 
-	// 平面
-	Plane plane;
-	plane.normal = MyVec3(-0.2f, 1.2f, -0.3f).Normalize();
-	plane.distance = 0.0f;
+	MyVec3 from0 = MyVec3{ 1.0f,0.7f,0.5f }.Normalize();
+	MyVec3 to0 = -from0;
 
+	MyVec3 from1 = MyVec3{ -0.6f,0.9f,0.2f }.Normalize();
+	MyVec3 to1 = MyVec3{ 0.4f,0.7f,-0.5f }.Normalize();
 
-	//円運動
-	/*float angularVelocity = 3.14f;
-	float angle = 0.0f;
-	float r = 0.8f;
-	Sphere p{};
-	p.ceneter = { r,0.0f,0.0f };
-	p.radius = 0.08f;*/
-
-
-	//振り子
-	/*Pendulum pendulum{};
-	pendulum.anchor = { 0.0f,1.0f,0.0f };
-	pendulum.length = 0.8f;
-	pendulum.angle = 0.7f;
-	pendulum.angularVelocity = 0.0f;
-	pendulum.angularAcceleration = 0.0f;
-	Sphere p{};
-	p.ceneter = { 0.0f,0.0f,0.0f };
-	p.radius = 0.08f;*/
-
-
-	//円錐振り子
-	/*ConicalPendulum conicalPendulum;
-	conicalPendulum.anchor = { 0.0f,1.0f,0.0f };
-	conicalPendulum.length = 0.8f;
-	conicalPendulum.halfApexAngle = 0.7f;
-	conicalPendulum.angle = 0.0f;
-	conicalPendulum.angularVelocity = 0.0f;
-	Sphere p{};
-	p.ceneter = { 0.0f,0.2f,0.0f };
-	p.radius = 0.08f;
-	conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
-	conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
-	float conicalRad = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
-	float conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
-	p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
-	p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
-	p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;*/
-
-
-	float timer = 0;
-	bool isStart = false;
-	bool isReset = false;
+	Matrix4x4 rotateMatrix2 = DirectionToDirection(MyVec3{ 1.0f,0.0f,0.0f }.Normalize(), MyVec3{ -1.0f,0.0f,0.0f }.Normalize());
+	Matrix4x4 rotateMatrix0 = DirectionToDirection(from0, to0);
+	Matrix4x4 rotateMatrix1 = DirectionToDirection(from1, to1);
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -147,27 +93,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("cameraTrans", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat2("cameraRotate", &camerarota.x, 0.01f);
 
-		if (isStart)
-		{
-			/*ImGui::DragFloat("length", &conicalPendulum.length, 0.01f, 0.01f, 10.0f);
-			ImGui::DragFloat("halfApexAngle", &conicalPendulum.halfApexAngle, 0.01f, 0.05f, 1.5f);*/
-		}
-
-		if (ImGui::Button("Start"))
-		{
-			isStart = true;
-		}
-		if (ImGui::Button("Reset"))
-		{
-			isReset = true;
-			isStart = false;
-			ball.position = { 0.8f,1.2f,0.3f };
-			ball.aceleration = { 0.0f,-9.8f,0.0f };
-			ball.velocity = { 0.0f, 0.0f, 0.0f };
-			timer = 0.0f;
-		}
-		ImGui::Text("time:%f", timer);
-
 		ImGui::End();
 
 #endif // _DEBUG
@@ -188,148 +113,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			camerarota.x += 0.01f;
 		}
-
-
-		//バネ
-		if (isStart)
-		{
-			/*MyVec3 diff = ball.position - spring.anchor;
-			float length = diff.Lenght();
-			if (length != 0.0f)
-			{
-				MyVec3 direction = diff.Normalize();
-				MyVec3 restPos = spring.anchor + direction * spring.naturalLength;
-				MyVec3 displacement = (ball.position - restPos) * length;
-				MyVec3 restoringForce = displacement * -spring.stiffness;
-				MyVec3 dempingForce = ball.velocity * -spring.dempingCoefficient;
-				MyVec3 force = restoringForce + dempingForce;
-				ball.aceleration = force / ball.mass + kGravity;
-			}
-			ball.velocity += ball.aceleration * deltaTime;
-			ball.position += ball.velocity * deltaTime;
-			ballDraw.ceneter = ball.position;*/
-
-
-			/*p.ceneter.x = originCenetr.x + std::cos(angle) * r;
-			p.ceneter.y = originCenetr.y + std::sin(angle) * r;
-			p.ceneter.z = originCenetr.z;
-			angle+=angularVelocity*deltaTime;*/
-
-
-			/*pendulum.angularAcceleration =
-				-(9.8f / pendulum.length) * std::sin(pendulum.angle);
-			pendulum.angularVelocity += pendulum.angularAcceleration * deltaTime;
-			pendulum.angle += pendulum.angularVelocity * deltaTime;
-
-			ball.position.x = pendulum.anchor.x + std::sin(pendulum.angle) * pendulum.length;
-			ball.position.y = pendulum.anchor.y - std::cos(pendulum.angle) * pendulum.length;
-			ball.position.z = pendulum.anchor.z;
-			p.ceneter = ball.position;*/
-
-
-			/*conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
-			conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
-			conicalRad = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
-			conicalheight = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
-			p.ceneter.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * conicalRad;
-			p.ceneter.y = conicalPendulum.anchor.y - conicalheight;
-			p.ceneter.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * conicalRad;*/
-
-			/*Capsule capsule;
-			capsule.radius = ball.radius;
-			capsule.segument.origin = ball.position;
-
-			ball.velocity += ball.aceleration * deltaTime;
-			ball.position += ball.velocity * deltaTime;
-
-			capsule.segument.diff = ball.position - capsule.segument.origin;*/
-
-			//if (true/*capsule.segument.origin.y >= capsule.segument.origin.y + capsule.segument.diff.y*/)
-			//{
-			//	Plane newPlane;
-			//	newPlane.normal = plane.normal;
-			//	newPlane.distance = plane.distance + ball.radius;
-
-			//	if (IsCollision(capsule.segument, newPlane))
-			//	{
-			//		float dot = capsule.segument.diff * newPlane.normal;
-			//		float t = newPlane.distance - capsule.segument.origin * newPlane.normal;
-			//		t = t / dot;
-
-			//		MyVec3 aPoint = capsule.segument.origin + (capsule.segument.diff * t);
-			//		ball.position = aPoint;
-			//		MyVec3 reflected = Reflect(ball.velocity, newPlane.normal);
-			//		MyVec3 projectToNormal = Project(reflected, newPlane.normal);
-			//		MyVec3 movingDirection = reflected - projectToNormal;
-			//		const float e = 0.8f;
-			//		ball.velocity = projectToNormal * e + movingDirection;
-
-			//	}
-
-			//}
-
-			Capsule capsules;
-			capsules.radius = ball.radius;
-			capsules.segument.origin = ball.position;
-
-			ball.velocity += ball.aceleration * deltaTime;
-			ball.position += ball.velocity * deltaTime;
-
-			capsules.segument.diff = ball.position - capsules.segument.origin;
-
-			//ball.velocity += ball.aceleration * deltaTime;
-			//ball.position += ball.velocity * deltaTime;
-			if (IsCollision(Sphere{ ball.position,ball.radius }, plane))
-			{
-				MyVec3 reflected = Reflect(ball.velocity, plane.normal);
-				MyVec3 projectToNormal = Project(reflected, plane.normal);
-				MyVec3 movingDirection = reflected - projectToNormal;
-				const float e = 0.6f;
-				ball.velocity = projectToNormal * e + movingDirection;
-
-				Capsule capsule;
-				capsule.radius = ball.radius;
-				capsule.segument.origin = ball.position;
-				capsule.segument.diff = plane.normal * 4.0f;
-
-				float dot = capsule.segument.diff * plane.normal;
-				float t = plane.distance - capsule.segument.origin * plane.normal;
-				if (dot != 0.0f)
-				{
-					t = t / dot;
-					if (-0.5f <= t && t <= 1.0f)
-					{
-						MyVec3 aPoint = capsule.segument.diff * t;
-						MyVec3 addLength = (plane.normal) * capsule.radius;
-						aPoint += addLength;
-						ball.position += aPoint;
-					}
-				}
-
-			}
-			else if (IsCollision(capsules.segument,plane))
-			{
-				Plane newPlane;
-				newPlane.normal = plane.normal;
-				newPlane.distance = plane.distance + ball.radius;
-
-				float dot = capsules.segument.diff * newPlane.normal;
-				float t = newPlane.distance - capsules.segument.origin * newPlane.normal;
-				t = t / dot;
-
-				MyVec3 aPoint = capsules.segument.origin + (capsules.segument.diff * t);
-				ball.position = aPoint;
-
-				MyVec3 reflected = Reflect(ball.velocity, plane.normal);
-				MyVec3 projectToNormal = Project(reflected, plane.normal);
-				MyVec3 movingDirection = reflected - projectToNormal;
-				const float e = 0.6f;
-				ball.velocity = projectToNormal * e + movingDirection;
-			}
-
-			timer += 1.0f * deltaTime;
-		}
-
 
 		/*Matrix4x4 worldMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotate, translate);*/
 		Matrix4x4 cameraMat = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, {0.0f,0.0f,0.0f}, cameraPosition);
@@ -367,9 +150,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			int(diffPoint.x), int(diffPoint.y), WHITE);
 		DrawSphere(p, viewProject, viewportMat, ball.color);*/
 
-		DrawPlane(plane, viewProject, viewportMat, WHITE);
-
-		DrawSphere(Sphere{ ball.position,ball.radius }, viewProject, viewportMat, WHITE);
+		MatrixScreenPrintf(0, 0, rotateMatrix2);
+		MatrixScreenPrintf(0, kRow*5, rotateMatrix0);
+		MatrixScreenPrintf(0, kRow*10, rotateMatrix1);
 
 
 		///
@@ -405,7 +188,7 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat)
 		for (int column = 0; column < 4; column++)
 		{
 			Novice::ScreenPrintf(
-				x + column * kCol, y + row * kRow, "%6.02f", mat.m[row][column]);
+				x + column * kCol, y + row * kRow, "%6.03f", mat.m[row][column]);
 		}
 	}
 }
