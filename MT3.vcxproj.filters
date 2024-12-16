@@ -128,5 +128,6 @@
     <ClInclude Include="MyVec3.h" />
     <ClInclude Include="Vector2Matrix.h" />
     <ClInclude Include="MathCalculation.h" />
+    <ClInclude Include="Quaternion.h" />
   </ItemGroup>
 </Project>

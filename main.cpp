@@ -5,11 +5,12 @@
 #include "imgui.h"
 #include <cmath>
 #include <algorithm>
+#include "Quaternion.h"
 
 const char kWindowTitle[] = "LE2A_15_フジツカ_ハルト_MT3";
 
 static const int kRow = 20;
-static const int kCol = 60;
+static const int kCol = 80;
 void VectorPrint(int x, int y, const MyVec3& vec, const char* lab);
 void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat);
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProject, const Matrix4x4& viewPort, uint32_t color);
@@ -54,22 +55,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const MyVec3 kGravity{ 0.0f,-9.8f,0.0f };
 
 
+	Quaternion q1 = { 2.0f,3.0f,4.0f,1.0f };
+	Quaternion q2 = { 1.0f,3.0f,5.0f,2.0f };
+	Quaternion identity = Quaternion::IdentityQuaternion();
+	Quaternion conj = q1.Conjugate();
+	Quaternion inv = q1.Inverse();
+	Quaternion normal = q1.Normalize();
+	Quaternion mul1 = q1 * q2;
+	Quaternion mul2 = q2 * q1;
+	float norm = q1.Norm();
+
+	Quaternion rotaion = Quaternion::AngleAxis(0.45f, MyVec3{ 1.0f,0.4f,-0.2f });
+	MyVec3 pointY = { 2.1f,-0.9f,1.3f };
+	Matrix4x4 rMat = rotaion.MakeRotateMatrix();
+	MyVec3 byQ = Quaternion::RotateVector(pointY, rotaion);
+	MyVec3 byMat = Transform(pointY, rMat);
 
 
-	MyVec3 axis = { 1.0f,1.0f,1.0f };
-	float angle = 0.44f;
-	Matrix4x4 rotateMatrix = MakeRotateAxisAngle(axis, angle);
-
-
-	MyVec3 from0 = MyVec3{ 1.0f,0.7f,0.5f }.Normalize();
-	MyVec3 to0 = -from0;
-
-	MyVec3 from1 = MyVec3{ -0.6f,0.9f,0.2f }.Normalize();
-	MyVec3 to1 = MyVec3{ 0.4f,0.7f,-0.5f }.Normalize();
-
-	Matrix4x4 rotateMatrix2 = DirectionToDirection(MyVec3{ 1.0f,0.0f,0.0f }.Normalize(), MyVec3{ -1.0f,0.0f,0.0f }.Normalize());
-	Matrix4x4 rotateMatrix0 = DirectionToDirection(from0, to0);
-	Matrix4x4 rotateMatrix1 = DirectionToDirection(from1, to1);
 
 	// キー入力結果を受け取る箱
 	char keys[256] = {0};
@@ -150,9 +152,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			int(diffPoint.x), int(diffPoint.y), WHITE);
 		DrawSphere(p, viewProject, viewportMat, ball.color);*/
 
-		MatrixScreenPrintf(0, 0, rotateMatrix2);
-		MatrixScreenPrintf(0, kRow*5, rotateMatrix0);
-		MatrixScreenPrintf(0, kRow*10, rotateMatrix1);
+		Novice::ScreenPrintf(0, 0, "%f,%f,%f,%f", identity.x, identity.y, identity.z, identity.w);
+		Novice::ScreenPrintf(0, 20, "%f,%f,%f,%f", conj.x, conj.y, conj.z, conj.w);
+		Novice::ScreenPrintf(0, 40, "%f,%f,%f,%f", inv.x, inv.y, inv.z, inv.w);
+		Novice::ScreenPrintf(0, 60, "%f,%f,%f,%f", normal.x, normal.y, normal.z, normal.w);
+		Novice::ScreenPrintf(0, 80, "%f,%f,%f,%f", mul1.x, mul1.y, mul1.z, mul1.w);
+		Novice::ScreenPrintf(0, 100, "%f,%f,%f,%f", mul2.x, mul2.y, mul2.z, mul2.w);
+		Novice::ScreenPrintf(0, 120, "%f", norm);
+
+
+		Novice::ScreenPrintf(0, 160, "%f,%f,%f,%f", rotaion.x, rotaion.y, rotaion.z, rotaion.w);
+		MatrixScreenPrintf(0, 180, rMat);
+		VectorPrint(0, 280, byQ, "byq");
+		VectorPrint(0, 300, byMat, "bymat");
 
 
 		///
@@ -175,9 +187,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 void VectorPrint(int x, int y, const MyVec3& vec, const char* lab)
 {
-	Novice::ScreenPrintf(x, y, "%.02f", vec.x);
-	Novice::ScreenPrintf(x + kCol, y, "%.02f", vec.y);
-	Novice::ScreenPrintf(x + kCol * 2, y, "%.02f", vec.z);
+	Novice::ScreenPrintf(x, y, "%f", vec.x);
+	Novice::ScreenPrintf(x + kCol, y, "%f", vec.y);
+	Novice::ScreenPrintf(x + kCol * 2, y, "%f", vec.z);
 	Novice::ScreenPrintf(x + kCol * 3, y, "%s", lab);
 }
 
@@ -188,7 +200,7 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& mat)
 		for (int column = 0; column < 4; column++)
 		{
 			Novice::ScreenPrintf(
-				x + column * kCol, y + row * kRow, "%6.03f", mat.m[row][column]);
+				x + column * kCol, y + row * kRow, "%6.04f", mat.m[row][column]);
 		}
 	}
 }
